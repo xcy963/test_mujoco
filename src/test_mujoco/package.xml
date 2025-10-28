@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypelayout="1.0"?>
+<package format="3">
+  <name>test_mujoco</name>
+  <version>0.0.0</version>
+  <description>A ROS2 package to integrate MuJoCo simulation</description>
+  <maintainer email="you@example.com">Your Name</maintainer>
+  <license>Apache-2.0</license>
+
+  <!-- 构建依赖，编译时需要 -->
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <!-- 如果你的项目涉及坐标变换，还需要这个 -->
+  <!-- <depend>tf2_ros</depend> -->
+
+
+
+  <!-- 导出包含目录，确保头文件能被找到 -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

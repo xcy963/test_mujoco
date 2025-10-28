@@ -1,0 +1,6 @@
+Tue Oct 28 18:43:35 2025
+ERROR: mjv_room2model: mjvScene scale too small
+
+Tue Oct 28 18:45:39 2025
+ERROR: mjv_room2model: mjvScene scale too small
+
