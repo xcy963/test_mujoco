@@ -10,8 +10,11 @@
 #include <functional>
 
 #include <mujoco/mujoco.h>
-#include "glfw_adapter.h"
-#include "simulate.h"
+
+// 前向声明
+namespace mujoco {
+class Simulate;
+}
 
 class MuJoCoSimulator {
 public:
@@ -31,6 +34,9 @@ public:
     // 获取模型和数据（线程安全）
     std::pair<mjModel*, mjData*> getModelAndData();
     
+    // 渲染循环
+    void renderLoop();
+
 private:
     void physicsThread();
     void loadPluginLibraries();
@@ -38,7 +44,8 @@ private:
     mjModel* loadModel(const std::string& file_path);
     void cleanup();
 
-    std::unique_ptr<mj::Simulate> simulate_;
+    // 使用 void* 来避免包含具体头文件，或者使用前向声明的智能指针
+    std::unique_ptr<mujoco::Simulate> simulate_;
     mjModel* model_;
     mjData* data_;
     
@@ -52,6 +59,9 @@ private:
     mjvCamera camera_;
     mjvOption option_;
     mjvPerturb perturb_;
+
+    // 模拟参数
+    std::string initial_model_path_;
 };
 
 #endif // MUJOCO_SIMULATOR_H

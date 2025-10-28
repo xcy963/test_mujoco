@@ -19,11 +19,12 @@ def generate_launch_description():
             name='mujoco_viewer',#把节点注册成这个,可以和代码里面指定的不一样，没有研究过这个机制
             executable='mujoco_ros_node',
             output='screen',
-            # parameters=[
-            #     config_path,  # 加载 YAML 文件
-            #     dynamic_params  # 注入动态参数（会覆盖 YAML 中的同名参数）
-            #     # moveit_config_params
-            # ],
+            parameters=[
+                {
+                "model_path":"/home/hitcrt/enginner_26/test_mujoco_ros/src/test_mujoco/modules/trs_so_arm100/scene.xml"
+                }
+                # moveit_config_params
+            ],
             arguments=['--ros-args', '--log-level', 'info'],
             emulate_tty=True,
         )

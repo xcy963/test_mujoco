@@ -64,13 +64,16 @@ set(SIMULATE_SOURCES
   ${MUJOCO_SIMULATE_DIR}/glfw_dispatch.cc
   ${MUJOCO_SIMULATE_DIR}/platform_ui_adapter.cc
   ${MUJOCO_SIMULATE_DIR}/simulate.cc
-  
 )
-
+set(OTHER_SOURCES
+  include/mujoco_ros_node.cpp
+  include/mujoco_test/mujoco_simulator.cpp
+)
 # 声明可执行文件
 add_executable(mujoco_ros_node
   src/main.cpp
   ${SIMULATE_SOURCES}
+  ${OTHER_SOURCES}
 )
 target_include_directories(mujoco_ros_node 
   PUBLIC 
