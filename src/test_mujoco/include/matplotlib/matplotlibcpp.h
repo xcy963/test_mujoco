@@ -46,6 +46,7 @@ namespace detail {
 static std::string s_backend;
 
 struct _interpreter {
+    PyObject* s_python_function_canvas; // 添加这个成员变量
     PyObject* s_python_function_arrow;
     PyObject *s_python_function_show;
     PyObject *s_python_function_close;
@@ -282,6 +283,14 @@ private:
         s_python_function_imshow = safe_import(pymod, "imshow");
 #endif
         s_python_empty_tuple = PyTuple_New(0);
+
+        //这个部分是xcy使用的改版,使得他可以调用canvas
+        PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");
+        PyObject* figure = PyObject_CallMethod(plt, "gcf", NULL);
+        s_python_function_canvas = PyObject_GetAttrString(figure, "canvas");
+        
+        Py_DECREF(figure);
+        Py_DECREF(plt);
     }
 
     ~_interpreter() {
@@ -469,6 +478,77 @@ bool plot(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const st
 
     return res;
 }
+
+//这个是xcy加的
+void buffer_rgba(std::vector<unsigned char>& buffer, int& width, int& height) {
+    PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");
+    if (!plt) {
+        PyErr_Print();
+        throw std::runtime_error("Failed to import matplotlib.pyplot");
+    }
+
+    // 获取当前 figure
+    PyObject* fig = PyObject_CallMethod(plt, "gcf", NULL);
+    if (!fig) {
+        PyErr_Print();
+        Py_DECREF(plt);
+        throw std::runtime_error("Failed to get current figure");
+    }
+
+    // 获取当前 canvas
+    PyObject* canvas = PyObject_GetAttrString(fig, "canvas");
+    Py_DECREF(fig);
+    Py_DECREF(plt);
+
+    if (!canvas) {
+        PyErr_Print();
+        throw std::runtime_error("Failed to get canvas");
+    }
+
+    // 重新绘制
+    PyObject* draw_result = PyObject_CallMethod(canvas, "draw", NULL);
+    if (!draw_result) {
+        PyErr_Print();
+        Py_DECREF(canvas);
+        throw std::runtime_error("Canvas draw() failed");
+    }
+    Py_DECREF(draw_result);
+
+    // 获取图像尺寸
+    PyObject* size_tuple = PyObject_CallMethod(canvas, "get_width_height", NULL);
+    if (!size_tuple || !PyTuple_Check(size_tuple)) {
+        Py_XDECREF(size_tuple);
+        Py_DECREF(canvas);
+        throw std::runtime_error("Failed to get figure size");
+    }
+    width  = static_cast<int>(PyFloat_AsDouble(PyTuple_GetItem(size_tuple, 0)));
+    height = static_cast<int>(PyFloat_AsDouble(PyTuple_GetItem(size_tuple, 1)));
+    Py_DECREF(size_tuple);
+
+    // 获取 RGBA 缓冲区
+    PyObject* result = PyObject_CallMethod(canvas, "buffer_rgba", NULL);
+    if (!result) {
+        PyErr_Print();
+        Py_DECREF(canvas);
+        throw std::runtime_error("Call to buffer_rgba failed");
+    }
+
+    Py_buffer view;
+    if (PyObject_GetBuffer(result, &view, PyBUF_SIMPLE) != 0) {
+        PyErr_Print();
+        Py_DECREF(result);
+        Py_DECREF(canvas);
+        throw std::runtime_error("Failed to get buffer from buffer_rgba");
+    }
+
+    buffer.assign((unsigned char*)view.buf, (unsigned char*)view.buf + view.len);
+    PyBuffer_Release(&view);
+    Py_DECREF(result);
+    Py_DECREF(canvas);
+}
+
+
+
 
 // TODO - it should be possible to make this work by implementing
 // a non-numpy alternative for `detail::get_2darray()`.
@@ -1364,7 +1444,7 @@ bool plot(const std::vector<NumericX>& x, const std::vector<NumericY>& y, const 
     PyObject* xarray = detail::get_array(x);
     PyObject* yarray = detail::get_array(y);
 
-    PyObject* pystring = PyString_FromString(s.c_str());
+    PyObject* pystring = PyUnicode_FromString(s.c_str());
 
     PyObject* plot_args = PyTuple_New(3);
     PyTuple_SetItem(plot_args, 0, xarray);

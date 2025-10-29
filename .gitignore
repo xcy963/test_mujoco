@@ -5,3 +5,4 @@ src/test_mujoco/mujoco-3.3.7/model
 src/test_mujoco/mujoco-3.3.7/sample
 src/test_mujoco/modules
 /.vscode
+/debug

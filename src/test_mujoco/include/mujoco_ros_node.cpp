@@ -2,18 +2,19 @@
 #include "mujoco_ros_node.h"
 #include <chrono>
 #include <thread>
-
+#include "matplotlib/matplotlibcpp.h"
 using namespace std::chrono_literals;
 
 MuJoCoROSNode::MuJoCoROSNode() 
     : Node("mujoco_viewer") {
-    
+    start_plot_thread();
     // 声明参数
     this->declare_parameter<std::string>("model_path", "");
     this->declare_parameter<double>("publish_rate", 100.0);
 }
 
 MuJoCoROSNode::~MuJoCoROSNode() {
+    stop_plot_thread();
     running_.store(false);
     shutdown_requested_.store(true);
     shutdown();
@@ -35,13 +36,36 @@ bool MuJoCoROSNode::initialize() {
         RCLCPP_ERROR(this->get_logger(), "Failed to initialize MuJoCo simulator!");
         return false;
     }
-    
-    // 设置步进回调
+    // 设置步进回调,可以看做这个函数把所有的东西都拿出来了
     simulator_->setStepCallback(
         [this](const mjModel* model, const mjData* data) {
             if (running_ && !shutdown_requested_) {
-                
                 this->publishJointStates(model, data);
+
+                std::lock_guard<std::mutex> lock(pic_loc_);//防止两个线程发生数据争端
+                time_history_.push_back(data->time);
+                if(torque_history_.size() != model->nv){
+                    torque_history_.resize(model->nv);
+                }
+                // 存储关节力矩历史
+                for (int i = 0; i < model->nv; i++) {
+                    double this_joint = data->qfrc_actuator[i];
+                    torque_history_[i].push_back(this_joint);
+                }
+                if(time_history_.size() > max_history_size_) {
+                    auto time_copy = time_history_;
+                    auto torque_copy = torque_history_;
+                    
+                    time_history_.clear();
+                    torque_history_.clear();
+                    
+                    {
+                        std::lock_guard<std::mutex> lock(plot_queue_mutex_);
+                        plot_queue_.emplace(std::move(time_copy), std::move(torque_copy));
+                    }
+                    plot_cv_.notify_one();//因为我们只有一个线程,所以这个使用一个的
+                }
+
             }else{
                 RCLCPP_INFO(this->get_logger(),"还在尝试发消息,但是应该不发");
             }
@@ -177,4 +201,80 @@ void MuJoCoROSNode::timerCallback() {
     } catch (const std::exception& e) {
         RCLCPP_ERROR(this->get_logger(), "Error in timer callback: %s", e.what());
     }
+}
+
+void MuJoCoROSNode::draw_pics(
+    const std::vector<double>& time_history,
+    const std::vector<std::vector<double>>& torque_history)
+{
+    namespace plt = matplotlibcpp;
+
+    if (time_history.empty() || torque_history.empty()) {
+        RCLCPP_WARN(this->get_logger(), "空列表，跳过绘图");
+        return;
+    }
+
+    size_t rows = torque_history.size();
+
+    static std::mutex plt_mutex;
+    std::lock_guard<std::mutex> lock(plt_mutex);
+
+    plt::backend("Agg");
+    plt::close();
+    plt::figure_size(1200, 800);
+
+    for (size_t i = 0; i < rows; i++) {
+        if (torque_history[i].empty()) {
+            RCLCPP_WARN(this->get_logger(), "torque_history[%zu] 为空，跳过绘制", i);
+            continue;
+        }
+
+        plt::subplot(rows, 1, i + 1);
+
+        std::stringstream ss;
+        ss << "Joint " << i + 1 << " Torque";
+        std::vector<double> test_x = time_history;
+        std::vector<double> test_y = torque_history[i];//直接给会有bug
+        plt::plot(time_history,torque_history[i]);//注意这里不能给他加第三个参数,不然subplot会报错
+        plt::xlabel("Time (s)");
+        plt::ylabel("Torque (N·m)");
+        plt::title(ss.str());
+        // plt::grid(true);
+    }
+    RCLCPP_INFO(this->get_logger(), "开始一次绘图");
+
+    plt::tight_layout();
+    // plt::show(false);
+    // plt::save("/home/hitcrt/enginner_26/test_mujoco_ros/debug/1.jpg");
+    std::vector<unsigned char> rgba_buffer;
+    int width = 0, height = 0;
+    plt::buffer_rgba(rgba_buffer, width, height);
+
+    if (!rgba_buffer.empty() && width > 0 && height > 0) {
+        cv::Mat rgba_mat(height, width, CV_8UC4, rgba_buffer.data());
+        cv::Mat bgr_mat;
+        cv::cvtColor(rgba_mat, bgr_mat, cv::COLOR_RGBA2BGR);
+        cv::imwrite("/home/hitcrt/enginner_26/test_mujoco_ros/debug/2.png", bgr_mat);
+    } else {
+        RCLCPP_INFO(this->get_logger(), "返回的是空的或尺寸为0");
+    }
+    // plt::pause(1); // 短暂暂停以更新图形
+}
+
+void MuJoCoROSNode::plot_worker() {
+    while (plot_running_) {
+        std::unique_lock<std::mutex> lock(plot_queue_mutex_);
+        plot_cv_.wait_for(lock, std::chrono::milliseconds(100));
+
+        if (!plot_running_) break;
+
+        if (!plot_queue_.empty()) {
+            auto data = std::move(plot_queue_.front());
+            plot_queue_.pop();
+            lock.unlock();
+
+            this->draw_pics(data.first, data.second);
+        }
+    }
+    return;
 }

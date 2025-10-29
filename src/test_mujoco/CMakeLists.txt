@@ -5,6 +5,7 @@ project(test_mujoco)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
+set(CMAKE_CXX_STANDARD 17)
 
 # 寻找必要的依赖包
 find_package(ament_cmake REQUIRED)
@@ -15,15 +16,7 @@ find_package(Python3 COMPONENTS Development NumPy)
 # find_package(lodepng REQUIRED)
 find_package(glfw3  REQUIRED)
 find_package(OpenGL REQUIRED)
-
-# target_include_directories(engineer_RRTConnect PUBLIC ${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS})
-# target_link_libraries(engineer_RRTConnect PUBLIC 
-#     kinematic
-#     engineer_KDTree
-#     engineer_fcl
-#     ${PYTHON_LIBRARIES}
-    
-# )
+find_package(OpenCV REQUIRED)   
 
 # 查找MuJoCo库。确保它已安装在系统路径，或者通过CMAKE_PREFIX_PATH指定
 # find_package(mujoco REQUIRED) 
@@ -69,6 +62,10 @@ set(OTHER_SOURCES
   include/mujoco_ros_node.cpp
   include/mujoco_test/mujoco_simulator.cpp
 )
+
+# add_library(mujoco_sim 
+#   ${SIMULATE_SOURCES}
+# )
 # 声明可执行文件
 add_executable(mujoco_ros_node
   src/main.cpp
@@ -88,12 +85,15 @@ target_include_directories(mujoco_ros_node
 target_link_libraries(mujoco_ros_node
   ${rclcpp_LIBRARIES}
   ${MUJOCO_LIBRARIES} 
-  ${PYTHON_LIBRARIES}
-  ${Python3_INCLUDE_DIRS} 
-  ${Python3_NumPy_INCLUDE_DIRS}
+  # ${PYTHON_LIBRARIES}
+  # ${Python3_INCLUDE_DIRS} 
+  # ${Python3_NumPy_INCLUDE_DIRS}
+  Python3::Python
   glfw
   OpenGL::GL
   lodepng
+  ${OpenCV_LIBS} 
+  # ${mujoco_sim}
 )
 
 # 声明ROS2相关的依赖，确保它们出现在头文件和链接路径中
