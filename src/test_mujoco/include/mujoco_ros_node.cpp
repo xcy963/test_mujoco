@@ -14,6 +14,7 @@ MuJoCoROSNode::MuJoCoROSNode()
 }
 
 MuJoCoROSNode::~MuJoCoROSNode() {
+    // RCLCPP_INFO(this->get_logger(),"准备退出画图线程");
     stop_plot_thread();
     running_.store(false);
     shutdown_requested_.store(true);
@@ -68,8 +69,17 @@ bool MuJoCoROSNode::initialize() {
                     plot_cv_.notify_one();//因为我们只有一个线程,所以这个使用一个的
                 }
 
+                if((time_history_.size() / max_history_size_) >= 10 ){
+                    time_history_.erase(time_history_.begin(), time_history_.begin() + max_history_size_);//删掉前面的这么多个,不然容易内存泄漏
+                    for (int i = 0; i < model->nv; i++) {
+                        double this_joint = data->qfrc_actuator[i];
+                        
+                        torque_history_[i].erase(torque_history_[i].begin(), torque_history_[i].begin() + max_history_size_);
+                    }
+                }
+
             }else{
-                RCLCPP_INFO(this->get_logger(),"还在尝试发消息,但是应该不发");
+                // RCLCPP_INFO(this->get_logger(),"还在尝试发消息,但是应该不发");
             }
         }
     );
@@ -128,8 +138,9 @@ void MuJoCoROSNode::shutdown() {
     running_ = false;
     
     RCLCPP_INFO(this->get_logger(), "Shutting down MuJoCo ROS node");
-    
-    // 先停止ROS组件
+    //关闭画图的线程
+    stop_plot_thread();
+    // 停止ROS组件
     stopROSComponents();
     
     // 然后停止模拟器
@@ -223,25 +234,30 @@ void MuJoCoROSNode::draw_pics(
 
     plt::backend("Agg");
     plt::close();
-    plt::figure_size(1200, 800);
+    plt::figure_size(1500, 1000);
 
     for (size_t i = 0; i < rows; i++) {
         if (torque_history[i].empty()) {
             RCLCPP_WARN(this->get_logger(), "torque_history[%zu] 为空，跳过绘制", i);
             continue;
         }
+        // RCLCPP_INFO(this->get_logger(), "现在的i是%ld",i);
 
         plt::subplot(rows, 1, i + 1);
 
-        std::stringstream ss;
-        ss << "Joint " << i + 1 << " Torque";
         std::vector<double> test_x = time_history;
         std::vector<double> test_y = torque_history[i];//直接给会有bug
-        plt::plot(time_history,torque_history[i]);//注意这里不能给他加第三个参数,不然subplot会报错
+        std::map<std::string, std::string> keywords;
+        keywords["label"] = std::format("Joint {} Torque",i + 1);
+        plt::plot(time_history,torque_history[i],keywords);//注意这里不能给他加第三个参数,不然subplot会报错
         plt::xlabel("Time (s)");
         plt::ylabel("Torque (N·m)");
-        plt::title(ss.str());
-        // plt::grid(true);
+        plt::title(std::format("Joint {} Torque", i + 1));
+
+        std::map<std::string, std::string> legend_kw;
+        legend_kw["loc"] = "upper right";
+        plt::legend(legend_kw);
+        plt::grid(true);
     }
     // RCLCPP_INFO(this->get_logger(), "开始一次绘图");
 
@@ -250,7 +266,7 @@ void MuJoCoROSNode::draw_pics(
     // plt::save("/home/hitcrt/enginner_26/test_mujoco_ros/debug/1.jpg");
     std::vector<unsigned char> rgba_buffer;
     int width = 0, height = 0;
-    plt::buffer_rgba(rgba_buffer, width, height);
+    plt::buffer_rgba(rgba_buffer, width, height);//a是透明度
 
     if (!rgba_buffer.empty() && width > 0 && height > 0) {
         cv::Mat rgba_mat(height, width, CV_8UC4, rgba_buffer.data());
@@ -258,7 +274,7 @@ void MuJoCoROSNode::draw_pics(
         cv::cvtColor(rgba_mat, bgr_mat, cv::COLOR_RGBA2BGR);
         // cv::imwrite("/home/hitcrt/enginner_26/test_mujoco_ros/debug/2.png", bgr_mat);
         cv::imshow("test",bgr_mat);
-        cv::waitKey(1);
+        // cv::waitKey(1);
     } else {
         RCLCPP_INFO(this->get_logger(), "返回的是空的或尺寸为0");
     }

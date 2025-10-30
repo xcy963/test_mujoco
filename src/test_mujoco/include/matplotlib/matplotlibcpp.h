@@ -1,5 +1,5 @@
 #pragma once
-
+//说明这个文件已经非常古董了,他似乎是使用python3.2编写的,但是我的使用年代是python3.12,所以我需要稍微改动一点
 // Python headers must be included before any system headers, since
 // they define _POSIX_C_SOURCE
 #include <Python.h>
@@ -46,7 +46,7 @@ namespace detail {
 static std::string s_backend;
 
 struct _interpreter {
-    PyObject* s_python_function_canvas; // 添加这个成员变量
+    // PyObject* s_python_function_canvas; // 在这里使用的话每次拿出来的不是最新的
     PyObject* s_python_function_arrow;
     PyObject *s_python_function_show;
     PyObject *s_python_function_close;
@@ -172,7 +172,25 @@ private:
 #else
         char name[] = "plotting";
 #endif
-        Py_SetProgramName(name);
+        PyStatus status;
+        PyConfig config;
+        PyConfig_InitPythonConfig(&config);
+
+        status = PyConfig_SetString(&config, &config.program_name, name);
+        if (PyStatus_Exception(status)) {
+            PyConfig_Clear(&config);
+            PyErr_Print();
+            throw "error python initial";
+            // return -1;
+        }
+
+        status = Py_InitializeFromConfig(&config);
+        if (PyStatus_Exception(status)) {
+            PyConfig_Clear(&config);
+            PyErr_Print();
+            throw "error python initial";
+        // return -1;
+        }
         Py_Initialize();
 
         wchar_t const *dummy_args[] = {L"Python", NULL};  // const is needed because literals must not be modified
@@ -284,13 +302,13 @@ private:
 #endif
         s_python_empty_tuple = PyTuple_New(0);
 
-        //这个部分是xcy使用的改版,使得他可以调用canvas
-        PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");
-        PyObject* figure = PyObject_CallMethod(plt, "gcf", NULL);
-        s_python_function_canvas = PyObject_GetAttrString(figure, "canvas");
+        // //这个部分是xcy使用的改版,使得他可以调用canvas
+        // PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");
+        // PyObject* figure = PyObject_CallMethod(plt, "gcf", NULL);
+        // s_python_function_canvas = PyObject_GetAttrString(figure, "canvas");
         
-        Py_DECREF(figure);
-        Py_DECREF(plt);
+        // Py_DECREF(figure);
+        // Py_DECREF(plt);
     }
 
     ~_interpreter() {
@@ -2539,7 +2557,10 @@ inline void xlabel(const std::string &str, const std::map<std::string, std::stri
     }
 
     PyObject* res = PyObject_Call(detail::_interpreter::get().s_python_function_xlabel, args, kwargs);
-    if(!res) throw std::runtime_error("Call to xlabel() failed.");
+    if(!res) {
+        PyErr_Print();
+        throw std::runtime_error("Call to xlabel() failed.");
+    }
 
     Py_DECREF(args);
     Py_DECREF(kwargs);

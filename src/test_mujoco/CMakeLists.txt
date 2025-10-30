@@ -5,7 +5,7 @@ project(test_mujoco)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)#选择20就可以使用format库了
 
 # 寻找必要的依赖包
 find_package(ament_cmake REQUIRED)

@@ -11,7 +11,7 @@
 
 
 #include "mujoco_test/mujoco_simulator.h"
-
+#include <format>//格式化字符串需要使用的
 class MuJoCoROSNode : public rclcpp::Node {
 public:
     MuJoCoROSNode();
