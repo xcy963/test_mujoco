@@ -63,13 +63,21 @@ set(OTHER_SOURCES
   include/mujoco_test/mujoco_simulator.cpp
 )
 
-# add_library(mujoco_sim 
-#   ${SIMULATE_SOURCES}
-# )
+add_library(mujoco_sim 
+  ${SIMULATE_SOURCES}
+)
+target_include_directories(mujoco_sim PUBLIC
+  ${MUJOCO_SIMULATE_DIR}
+  ${MUJOCO_INCLUDE_DIRS}
+)
+target_link_libraries(mujoco_sim PUBLIC
+    glfw
+  OpenGL::GL
+)
 # 声明可执行文件
 add_executable(mujoco_ros_node
   src/main.cpp
-  ${SIMULATE_SOURCES}
+  # ${SIMULATE_SOURCES}
   ${OTHER_SOURCES}
 )
 target_include_directories(mujoco_ros_node 
@@ -89,11 +97,10 @@ target_link_libraries(mujoco_ros_node
   # ${Python3_INCLUDE_DIRS} 
   # ${Python3_NumPy_INCLUDE_DIRS}
   Python3::Python
-  glfw
-  OpenGL::GL
+
   lodepng
   ${OpenCV_LIBS} 
-  # ${mujoco_sim}
+  mujoco_sim
 )
 
 # 声明ROS2相关的依赖，确保它们出现在头文件和链接路径中

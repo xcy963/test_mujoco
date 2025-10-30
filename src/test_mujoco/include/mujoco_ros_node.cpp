@@ -52,12 +52,14 @@ bool MuJoCoROSNode::initialize() {
                     double this_joint = data->qfrc_actuator[i];
                     torque_history_[i].push_back(this_joint);
                 }
-                if(time_history_.size() > max_history_size_) {
+                cv::waitKey(1);//放在这里为了刷新opencv的窗口
+
+                if((time_history_.size() % max_history_size_) == 0 ) {
                     auto time_copy = time_history_;
                     auto torque_copy = torque_history_;
                     
-                    time_history_.clear();
-                    torque_history_.clear();
+                    // time_history_.clear();
+                    // torque_history_.clear();
                     
                     {
                         std::lock_guard<std::mutex> lock(plot_queue_mutex_);
@@ -241,7 +243,7 @@ void MuJoCoROSNode::draw_pics(
         plt::title(ss.str());
         // plt::grid(true);
     }
-    RCLCPP_INFO(this->get_logger(), "开始一次绘图");
+    // RCLCPP_INFO(this->get_logger(), "开始一次绘图");
 
     plt::tight_layout();
     // plt::show(false);
@@ -254,7 +256,9 @@ void MuJoCoROSNode::draw_pics(
         cv::Mat rgba_mat(height, width, CV_8UC4, rgba_buffer.data());
         cv::Mat bgr_mat;
         cv::cvtColor(rgba_mat, bgr_mat, cv::COLOR_RGBA2BGR);
-        cv::imwrite("/home/hitcrt/enginner_26/test_mujoco_ros/debug/2.png", bgr_mat);
+        // cv::imwrite("/home/hitcrt/enginner_26/test_mujoco_ros/debug/2.png", bgr_mat);
+        cv::imshow("test",bgr_mat);
+        cv::waitKey(1);
     } else {
         RCLCPP_INFO(this->get_logger(), "返回的是空的或尺寸为0");
     }

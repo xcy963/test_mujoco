@@ -479,9 +479,9 @@ bool plot(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const st
     return res;
 }
 
-//这个是xcy加的
+//这个是xcy加的,用来调取python的canvas
 void buffer_rgba(std::vector<unsigned char>& buffer, int& width, int& height) {
-    PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");
+    PyObject* plt = PyImport_ImportModule("matplotlib.pyplot");//类似于使用python的import
     if (!plt) {
         PyErr_Print();
         throw std::runtime_error("Failed to import matplotlib.pyplot");

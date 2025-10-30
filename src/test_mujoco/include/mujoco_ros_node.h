@@ -56,7 +56,8 @@ private:
 
     std::vector<double> time_history_;
     std::vector<std::vector<double>> torque_history_;
-    const size_t max_history_size_ = 20;
+    const size_t max_history_size_ = 2000;
+    // size_t now_size
     std::mutex pic_loc_;
 
     std::thread plot_thread_;
