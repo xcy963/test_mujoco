@@ -1,6 +1,4 @@
-// mujoco_ros_node.h
-#ifndef MUJOCO_ROS_NODE_H
-#define MUJOCO_ROS_NODE_H
+#pragma once
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -8,7 +6,6 @@
 #include <memory>
 #include <atomic>
 #include <opencv2/opencv.hpp>
-
 
 #include "mujoco_test/mujoco_simulator.h"
 #include <format>//格式化字符串需要使用的
@@ -30,7 +27,7 @@ public:
         if (plot_thread_.joinable()) {
             plot_thread_.join();
         }
-        RCLCPP_INFO(this->get_logger(),"画图的节点退出");
+        RCLCPP_INFO(this->get_logger(),"画图的线程退出");
     }
 
 private:
@@ -68,6 +65,7 @@ private:
     
     void plot_worker() ;
 
-};
+    std::unique_ptr<CameraRenderer> CameraRenderer_;
 
-#endif // MUJOCO_ROS_NODE_H
+    
+};

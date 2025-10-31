@@ -99,3 +99,10 @@ void setJointControl(const mjModel* m, mjData* d,
     }
 }
 ```
+
+## 关于添加相机的说明
+
+```xml
+
+
+```

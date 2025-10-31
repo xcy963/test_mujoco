@@ -1,15 +1,13 @@
-// mujoco_simulator.h
-#ifndef MUJOCO_SIMULATOR_H
-#define MUJOCO_SIMULATOR_H
-
+#pragma once
 #include <memory>
 #include <string>
 #include <thread>
 #include <atomic>
 #include <mutex>
 #include <functional>
-
 #include <mujoco/mujoco.h>
+#include "camera_render.hpp"
+
 
 // 前向声明
 namespace mujoco {
@@ -35,7 +33,7 @@ public:
     std::pair<mjModel*, mjData*> getModelAndData();
     
     // 渲染循环
-    void renderLoop();
+    void renderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer);
 
 private:
     void physicsThread();
@@ -62,6 +60,6 @@ private:
 
     // 模拟参数
     std::string initial_model_path_;
+    // std::unique_ptr<CameraRenderer> CameraRenderer_;
+    // std::unique_ptr<EGLContextManager> egl_context_;
 };
-
-#endif // MUJOCO_SIMULATOR_H

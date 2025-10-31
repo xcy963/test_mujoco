@@ -1,6 +1,63 @@
-Tue Oct 28 18:43:35 2025
+Fri Oct 31 16:46:27 2025
 ERROR: mjv_room2model: mjvScene scale too small
 
-Tue Oct 28 18:45:39 2025
+Fri Oct 31 16:52:02 2025
 ERROR: mjv_room2model: mjvScene scale too small
+
+Fri Oct 31 16:53:32 2025
+ERROR: mjv_room2model: mjvScene scale too small
+
+Fri Oct 31 16:57:24 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0580.
+
+Fri Oct 31 16:58:59 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0620.
+
+Fri Oct 31 17:01:02 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:01:26 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:01:58 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:05:08 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:07:04 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:07:28 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:07:28 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:07:28 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0000.
+
+Fri Oct 31 17:10:15 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.1220.
+
+Fri Oct 31 17:12:06 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:12:44 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:15:22 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:15:46 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:16:02 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0000.
+
+Fri Oct 31 17:16:25 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
+
+Fri Oct 31 17:34:57 2025
+WARNING: Pre-allocated visual geom buffer is full. Increase maxgeom above 0. Time = 0.0020.
 

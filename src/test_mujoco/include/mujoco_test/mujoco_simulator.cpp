@@ -46,7 +46,6 @@ bool MuJoCoSimulator::initialize(const std::string& model_path) {
         std::make_unique<mj::GlfwAdapter>(),
         &camera_, &option_, &perturb_, false
     );
-
     return true;
 }
 
@@ -58,6 +57,7 @@ void MuJoCoSimulator::start() {
     
     // 启动物理线程
     physics_thread_ = std::thread(&MuJoCoSimulator::physicsThread, this);
+
 }
 
 void MuJoCoSimulator::stop() {
@@ -74,9 +74,10 @@ bool MuJoCoSimulator::isRunning() const {
     return running_;
 }
 
-void MuJoCoSimulator::renderLoop() {
+void MuJoCoSimulator::renderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer) {
+
     if (simulate_) {
-        simulate_->RenderLoop();
+        simulate_->RenderLoop(CameraRenderer);
     }
 }
 
@@ -103,13 +104,18 @@ void MuJoCoSimulator::physicsThread() {
             }
         }
         if (simulate_ && (!model_ || !data_)) {
-            simulate_->LoadMessageClear();
+            simulate_->LoadMessageClear();//这个意味着加载失败了
+            std::cerr<<"fail to init simulate_"<<std::endl;
         }
     }
+    // if (egl_context_) {
+    //     egl_context_->makeCurrent();
+    // }
 
-    // CPU-模拟同步点
-    std::chrono::time_point<std::chrono::steady_clock> syncCPU;
-    double syncSim = 0;
+
+    // CPU-模拟同步点,不知道这个在这是干吗的
+    // std::chrono::time_point<std::chrono::steady_clock> syncCPU;
+    // double syncSim = 0;
 
     while (!exit_request_.load()) {
         if (!simulate_) {

@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "simulate.h"
 
 #include <algorithm>
@@ -36,6 +35,8 @@
 #include "platform_ui_adapter.h"
 #include "array_safety.h"
 
+#include <GLFW/glfw3.h>
+#include <iostream>
 // When launched via an App Bundle on macOS, the working directory is the path to the App Bundle's
 // resource directory. This causes files to be saved into the bundle, which is not the desired
 // behavior. Instead, we open a save dialog box to ask the user where to put the file.
@@ -2747,7 +2748,7 @@ void Simulate::Render() {
 
 
 
-void Simulate::RenderLoop() {
+void Simulate::RenderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer) {
   // Set timer callback (milliseconds)
   mjcb_time = Timer;
 
@@ -2879,7 +2880,10 @@ void Simulate::RenderLoop() {
 
     // render while simulation is running
     this->Render();
-
+    // if(!CameraRenderer->is_initialized()){
+    //   CameraRenderer->initialize(m_);
+    // }
+    // CameraRenderer->render_frame(m_,d_);
     // update FPS stat, at most 5 times per second
     auto now = mj::Simulate::Clock::now();
     double interval = Seconds(now - last_fps_update_).count();

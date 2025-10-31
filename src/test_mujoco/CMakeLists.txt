@@ -17,7 +17,8 @@ find_package(Python3 COMPONENTS Development NumPy)
 find_package(glfw3  REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)   
-
+# find_package(PkgConfig REQUIRED)
+# pkg_check_modules(EGL REQUIRED egl) # 尝试通过pkg-config查找
 # 查找MuJoCo库。确保它已安装在系统路径，或者通过CMAKE_PREFIX_PATH指定
 # find_package(mujoco REQUIRED) 
 set(MUJOCO_HOME "./mujoco-3.3.7")
@@ -69,10 +70,12 @@ add_library(mujoco_sim
 target_include_directories(mujoco_sim PUBLIC
   ${MUJOCO_SIMULATE_DIR}
   ${MUJOCO_INCLUDE_DIRS}
+  # ${EGL_INCLUDE_DIRS}
 )
 target_link_libraries(mujoco_sim PUBLIC
     glfw
   OpenGL::GL
+  # ${EGL_LIBRARIES}
 )
 # 声明可执行文件
 add_executable(mujoco_ros_node

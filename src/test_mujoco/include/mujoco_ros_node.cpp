@@ -11,6 +11,7 @@ MuJoCoROSNode::MuJoCoROSNode()
     // 声明参数
     this->declare_parameter<std::string>("model_path", "");
     this->declare_parameter<double>("publish_rate", 100.0);
+    CameraRenderer_ = std::make_unique<CameraRenderer>();
 }
 
 MuJoCoROSNode::~MuJoCoROSNode() {
@@ -19,6 +20,7 @@ MuJoCoROSNode::~MuJoCoROSNode() {
     running_.store(false);
     shutdown_requested_.store(true);
     shutdown();
+    CameraRenderer_->shutdown();
 }
 
 bool MuJoCoROSNode::initialize() {
@@ -42,7 +44,15 @@ bool MuJoCoROSNode::initialize() {
         [this](const mjModel* model, const mjData* data) {
             if (running_ && !shutdown_requested_) {
                 this->publishJointStates(model, data);
-
+                // CameraFrame frame;
+                // CameraRenderer_->wait_for_frame(frame);
+                // cv::Mat img_rgb(frame.height, frame.width, CV_8UC3, const_cast<unsigned char*>(frame.rgb_data.data()));
+                // cv::Mat img_bgr;
+                // cv::cvtColor(img_rgb, img_bgr, cv::COLOR_RGB2BGR);
+                // cv::imshow("camera_rgb", img_bgr);
+                // cv::waitKey(1);//放在这里为了刷新opencv的窗口
+                
+                // CameraRenderer_->list_cameras(model);
                 std::lock_guard<std::mutex> lock(pic_loc_);//防止两个线程发生数据争端
                 time_history_.push_back(data->time);
                 if(torque_history_.size() != model->nv){
@@ -53,7 +63,6 @@ bool MuJoCoROSNode::initialize() {
                     double this_joint = data->qfrc_actuator[i];
                     torque_history_[i].push_back(this_joint);
                 }
-                cv::waitKey(1);//放在这里为了刷新opencv的窗口
 
                 if((time_history_.size() % max_history_size_) == 0 ) {
                     auto time_copy = time_history_;
@@ -123,7 +132,8 @@ void MuJoCoROSNode::run() {
     
     // 启动模拟器（这会阻塞，直到模拟器窗口关闭）
     simulator_->start();
-    simulator_->renderLoop();
+    // std::cout<<"start 函数返回"<<std::endl;
+    simulator_->renderLoop(CameraRenderer_);
     
     // 模拟器窗口关闭后，执行清理
     shutdown();

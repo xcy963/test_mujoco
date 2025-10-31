@@ -31,6 +31,7 @@
 #include <mujoco/mujoco.h>
 #include "platform_ui_adapter.h"
 
+#include "camera_render.hpp"//xcy添加用来渲染图像的
 namespace mujoco {
 
 // The viewer itself doesn't require a reentrant mutex, however we use it in
@@ -83,7 +84,7 @@ class Simulate {
   void Render();
 
   // loop to render the UI (must be called from main thread because of MacOS)
-  void RenderLoop();
+  void RenderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer);
 
   // add state to history buffer
   void AddToHistory();
