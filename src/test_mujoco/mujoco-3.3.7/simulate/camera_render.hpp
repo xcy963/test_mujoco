@@ -213,6 +213,7 @@ bool initialize(const mjModel* model,mjvScene *scn_temp, GLFWwindow* shared_with
     int camera_id = 0;
 
     bool render_frame(const mjModel* model, mjData* data) {
+        // std::cout<<"渲染一次"<<std::endl;
         if (!initialized_.load() || shutdown_requested_.load()) {
             std::cerr << "[CameraRenderer] render_frame: not initialized or shutdown requested\n";
             return false;

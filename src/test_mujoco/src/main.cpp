@@ -22,7 +22,7 @@ void signalHandler(int signum) {
     }
     
     // 给ROS一些时间进行清理
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     
     rclcpp::shutdown();
     std::exit(signum);
@@ -51,19 +51,23 @@ int main(int argc, char** argv) {
         
         // 创建节点
         node = std::make_shared<MuJoCoROSNode>();
-        
+
         // 初始化节点
         if (!node->initialize()) {
             std::cerr << "Failed to initialize MuJoCo ROS node" << std::endl;
             rclcpp::shutdown();
             return -1;
         }
-        
+        rclcpp::executors::SingleThreadedExecutor executor;
+        executor.add_node(node);
         // std::cout << "MuJoCo ROS node started. Press Ctrl+C to exit." << std::endl;
-        
-        // 运行模拟器（这会阻塞，直到模拟器窗口关闭）
+        std::thread executor_thread([&executor]() {
+            executor.spin();
+        });
+        //
         node->run();
-        
+        rclcpp::shutdown();
+        executor_thread.join();
         RCLCPP_INFO(node->get_logger(),"MuJoCo ROS node finished.");
         
     } catch (const std::exception& e) {
