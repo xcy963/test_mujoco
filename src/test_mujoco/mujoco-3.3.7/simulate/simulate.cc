@@ -2748,7 +2748,7 @@ void Simulate::Render() {
 
 
 
-void Simulate::RenderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer) {
+void Simulate::RenderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer) {//传进来的目的主要还是共享
   // Set timer callback (milliseconds)
   mjcb_time = Timer;
 
@@ -2879,11 +2879,12 @@ void Simulate::RenderLoop(const std::unique_ptr<CameraRenderer> &CameraRenderer)
     }  // MutexLock (unblocks simulation thread)
 
     // render while simulation is running
+    // mjData* data = d_;
     this->Render();
-    // if(!CameraRenderer->is_initialized()){
-    //   CameraRenderer->initialize(m_);
-    // }
-    // CameraRenderer->render_frame(m_,d_);
+    if(!CameraRenderer->is_initialized()){
+      CameraRenderer->initialize(m_,&scn);
+    }
+    CameraRenderer->render_frame(m_,d_);
     // update FPS stat, at most 5 times per second
     auto now = mj::Simulate::Clock::now();
     double interval = Seconds(now - last_fps_update_).count();

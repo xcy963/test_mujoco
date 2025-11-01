@@ -66,6 +66,6 @@ private:
     void plot_worker() ;
 
     std::unique_ptr<CameraRenderer> CameraRenderer_;
-
+    std::chrono::steady_clock::time_point time_last_;
     
 };

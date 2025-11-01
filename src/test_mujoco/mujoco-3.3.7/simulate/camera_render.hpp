@@ -96,7 +96,8 @@ public:
      * @param font_scale 字体缩放
      * @return 初始化是否成功
      */
-bool initialize(const mjModel* model, GLFWwindow* shared_with_window = nullptr, int font_scale = mjFONTSCALE_150) {
+bool initialize(const mjModel* model,mjvScene *scn_temp, GLFWwindow* shared_with_window = nullptr, int font_scale = mjFONTSCALE_150) {
+        scn_ = *scn_temp;
         if (!model) {
             std::cerr << "[CameraRenderer] initialize: model is nullptr\n";
             return false;
@@ -236,10 +237,10 @@ bool initialize(const mjModel* model, GLFWwindow* shared_with_window = nullptr, 
         if (extent <= 1e-6f) {
             extent = 1.0f; // fallback：模型没有正确统计 extent 时使用 1.0
         }
-        // 保证 scn_.scale 有合理大小（避免 MuJoCo 内部的房间->模型缩放错误）
-        if (scn_.scale <= 1e-6f) {
-            scn_.scale = extent * 0.3f; // 设为 extent 的一个比例
-        }
+        // // 保证 scn_.scale 有合理大小（避免 MuJoCo 内部的房间->模型缩放错误）
+        // if (scn_.scale <= 1e-6f) {
+        //     scn_.scale = extent * 0.3f; // 设为 extent 的一个比例
+        // }
 
         // 设置相机
         cam_.type = mjCAMERA_FIXED;

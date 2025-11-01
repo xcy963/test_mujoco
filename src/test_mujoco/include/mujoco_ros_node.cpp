@@ -40,17 +40,28 @@ bool MuJoCoROSNode::initialize() {
         return false;
     }
     // 设置步进回调,可以看做这个函数把所有的东西都拿出来了
+    time_last_ = std::chrono::steady_clock::now();
     simulator_->setStepCallback(
         [this](const mjModel* model, const mjData* data) {
             if (running_ && !shutdown_requested_) {
-                this->publishJointStates(model, data);
-                // CameraFrame frame;
-                // CameraRenderer_->wait_for_frame(frame);
-                // cv::Mat img_rgb(frame.height, frame.width, CV_8UC3, const_cast<unsigned char*>(frame.rgb_data.data()));
-                // cv::Mat img_bgr;
-                // cv::cvtColor(img_rgb, img_bgr, cv::COLOR_RGB2BGR);
-                // cv::imshow("camera_rgb", img_bgr);
-                // cv::waitKey(1);//放在这里为了刷新opencv的窗口
+                // this->publishJointStates(model, data);
+                auto time_now = std::chrono::steady_clock::now();
+                double fps = std::chrono::duration<double>(time_now - time_last_).count();
+                time_last_ = time_now;
+                fps = 1.0/fps;
+                RCLCPP_INFO(this->get_logger(),"现在的步进帧率%f",fps);
+
+                CameraFrame frame;
+                bool ok = CameraRenderer_->wait_for_frame(frame);
+                if(ok){
+                    cv::Mat img_rgb(frame.height, frame.width, CV_8UC3, const_cast<unsigned char*>(frame.rgb_data.data()));
+                    cv::Mat img_bgr;
+                    cv::cvtColor(img_rgb, img_bgr, cv::COLOR_RGB2BGR);
+                    cv::flip(img_bgr, img_bgr, 0);
+
+                    // cv::imshow("camera_rgb", img_bgr);
+                    // cv::waitKey(1);//放在这里为了刷新opencv的窗口
+                }
                 
                 // CameraRenderer_->list_cameras(model);
                 std::lock_guard<std::mutex> lock(pic_loc_);//防止两个线程发生数据争端
