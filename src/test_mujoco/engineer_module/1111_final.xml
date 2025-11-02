@@ -1,0 +1,140 @@
+<mujoco model="111urdf">
+  <compiler angle="radian" meshdir="meshes/" />
+<!-- <compiler angle="degree" meshdir="meshes/" /> -->
+  <asset>
+    <mesh name="base_link" file="base_link.STL"/>
+    <mesh name="link0" file="link0.STL"/>
+    <mesh name="link1" file="link1.STL"/>
+    <mesh name="link2" file="link2.STL"/>
+    <mesh name="link3" file="link3.STL"/>
+    <mesh name="L_link4" file="L_link4.STL"/>
+    <mesh name="L_link5" file="L_link5.STL"/>
+    <mesh name="R_link4" file="R_link4.STL"/>
+    <mesh name="R_link5" file="R_link5.STL"/>
+  </asset>
+
+  <default>
+    <default class="111urdf">
+      <joint frictionloss="0.1" armature="0.1" />
+      <!-- 在这个里面加ctrl range才是控制ui，里面那个control的 这样才不是-1 到 1 -->
+      <position ctrlrange="-3.14158 3.14158" />
+
+      <default class="joint0_class">
+        <joint  axis="0 0 1" range="-3.14158 3.14158" armature="0.015"/>
+        <position kp="80" kv="20" forcerange="-80 80"/>
+      </default>
+
+      <default class="joint1_class">
+        <joint  axis="0 -1 0" range="-2.9 2.9"  />
+        <position kp="400" kv="100" forcerange="-80 80"/>
+      </default>
+
+      <default class="joint2_class">
+        <joint  axis="0 -1 0" range="-0.9 0.9"  />
+        <position kp="350" kv="90" forcerange="-80 80"/>
+      </default>
+
+      <default class="joint3_class">
+        <joint  axis="0 -1 0" range="-0.9 0.9"  />
+        <position kp="120" kv="30" forcerange="-80 80"/>
+      </default>
+
+      <default class="L_joint4_class">
+        <joint  axis="0 0 -1" range="-0.9 0.9"  />
+        <position kp="60" kv="15" forcerange="-60 60"/>
+      </default>
+
+      <default class="L_joint5_class">
+        <joint  axis="-1 0 0" range="-0.9 0.9"  />
+        <position kp="40" kv="10" forcerange="-40 40"/>
+      </default>
+
+      <default class="R_joint4_class">
+        <joint  axis="0 0 -1" range="-0.9 0.9"  />
+        <position kp="60" kv="15" forcerange="-60 60"/>
+      </default>
+
+      <default class="R_joint5_class">
+        <joint  axis="-1 0 0" range="-0.9 0.9"  />
+        <position kp="40" kv="10" forcerange="-40 40"/>
+      </default>
+    </default>
+  </default>
+
+
+
+  <worldbody>
+    <body name="Base" childclass="111urdf">
+    <geom type="mesh" rgba="0.698039 0.698039 0.698039 1" mesh="base_link"/>
+
+    <body name="link0" pos="0 0 0.06">
+      <inertial pos="0 -0.0374303 0.0501927" quat="0.766552 0.642183 0 0"
+                mass="2.3861" diaginertia="0.013117 0.0126308 0.004964"/>
+      <joint name="joint0" class="joint0_class" />
+      <geom type="mesh" mesh="link0" rgba="0.75 0.75 0.75 1"/>
+
+      <body name="link1" pos="0 0 0.065">
+        <inertial pos="0 0.0290823 0.0759799" quat="0.993946 0.109872 0 0"
+                  mass="3.07103" diaginertia="0.0373565 0.0367745 0.00493656"/>
+        <joint name="joint1" class="joint1_class" />
+        <geom type="mesh" mesh="link1" rgba="0.75 0.75 0.75 1"/>
+
+        <body name="link2" pos="0 0 0.275">
+          <inertial pos="0.21751 -0.00732758 0" quat="0.0276664 0.706565 -0.0276664 0.706565"
+                    mass="2.67222" diaginertia="0.0348521 0.0332228 0.00421309"/>
+          <joint name="joint2" class="joint2_class" />
+          <geom type="mesh" mesh="link2" rgba="0.75 0.75 0.75 1"/>
+
+          <body name="link3" pos="0.333 0 0">
+            <inertial pos="0 0 0.06418" quat="0.707107 0.707107 0 0"
+                      mass="1.87827" diaginertia="0.0225609 0.0205013 0.00312775"/>
+            <joint name="joint3" class="joint3_class" />
+            <geom type="mesh" mesh="link3" rgba="0.75 0.75 0.75 1"/>
+
+            <body name="L_link4" pos="0 0.2 0.0117923">
+              <inertial pos="0.00634178 0 0.0100452" quat="0.998933 0 0.0461773 0"
+                        mass="0.714774" diaginertia="0.000742567 0.000660067 0.000659272"/>
+              <joint name="L_joint4" class="L_joint4_class" />
+              <geom type="mesh" mesh="L_link4" rgba="0.75 0.75 0.75 1"/>
+
+              <body name="L_link5">
+                <inertial pos="0.161989 0 0" quat="0.5 0.5 0.5 0.5"
+                          mass="2.44266" diaginertia="0.0180913 0.0180913 0.00158968"/>
+                <joint name="L_joint5" class="L_joint5_class" />
+                <geom type="mesh" mesh="L_link5" rgba="0.75 0.75 0.75 1"/>
+              </body>
+            </body>
+
+            <body name="R_link4" pos="0 -0.2 0.0117923">
+              <inertial pos="0.00634178 0 0.0100452" quat="0.998933 0 0.0461773 0"
+                        mass="0.714774" diaginertia="0.000742567 0.000660067 0.000659272"/>
+              <joint name="R_joint4" class="R_joint4_class" />
+              <geom type="mesh" mesh="R_link4" rgba="0.75 0.75 0.75 1"/>
+
+              <body name="R_link5">
+                <inertial pos="0.161989 0 0" quat="0.5 0.5 0.5 0.5"
+                          mass="2.44266" diaginertia="0.0180913 0.0180913 0.00158968"/>
+                <joint name="R_joint5" class="R_joint5_class" />
+                <geom type="mesh" mesh="R_link5" rgba="0.75 0.75 0.75 1"/>
+              </body>
+            </body>
+          </body>
+        </body>
+        <camera name="wrist_camera" mode="fixed" pos="0.1 0.05 0.02" euler="0 0 0" fovy="75"/>
+      </body>
+    </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position class="joint0_class" name="pos_joint0" joint="joint0" />
+    <position class="joint1_class" joint="joint1" name="pos_joint1"/>
+    <position class="joint2_class" joint="joint2" name="pos_joint2"/>
+    <position class="joint3_class" joint="joint3" name="pos_joint3"/>
+    <position class="L_joint4_class" joint="L_joint4" name="pos_L_joint4"/>
+    <position class="L_joint5_class" joint="L_joint5" name="pos_L_joint5"/>
+    <position class="R_joint4_class" joint="R_joint4" name="pos_R_joint4"/>
+    <position class="R_joint5_class" joint="R_joint5" name="pos_R_joint5"/>
+  </actuator>
+
+</mujoco>

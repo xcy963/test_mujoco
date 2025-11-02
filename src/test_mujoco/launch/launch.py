@@ -21,7 +21,9 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {
-                "model_path":"/home/hitcrt/enginner_26/test_mujoco_ros/src/test_mujoco/modules/trs_so_arm100/scene.xml"
+                "model_path":"/home/hitcrt/enginner_26/test_mujoco_ros/src/test_mujoco/engineer_module/scene.xml"
+                # "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_mujoco/modules/trs_so_arm100/scene.xml
+
                 }
                 # moveit_config_params
             ],

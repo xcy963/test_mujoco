@@ -6,3 +6,5 @@ src/test_mujoco/mujoco-3.3.7/sample
 src/test_mujoco/modules
 /.vscode
 /debug
+
+# src/test_mujoco/engineer_module

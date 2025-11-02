@@ -91,3 +91,6 @@ ERROR: mjv_room2model: mjvScene scale too small
 Sat Nov  1 15:51:32 2025
 ERROR: gladLoadGL error
 
+Sat Nov  1 20:36:07 2025
+WARNING: Nan, Inf or huge value in QACC at DOF 5. The simulation is unstable. Time = 0.0580.
+

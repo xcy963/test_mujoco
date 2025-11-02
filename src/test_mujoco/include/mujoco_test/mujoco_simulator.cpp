@@ -107,6 +107,8 @@ void MuJoCoSimulator::physicsThread() {
             simulate_->LoadMessageClear();//这个意味着加载失败了
             std::cerr<<"fail to init simulate_"<<std::endl;
         }
+    }else{
+        throw "WRONG EMPTY MODELPATH";
     }
     // if (egl_context_) {
     //     egl_context_->makeCurrent();

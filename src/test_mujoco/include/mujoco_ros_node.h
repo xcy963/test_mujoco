@@ -53,7 +53,7 @@ private:
 
     std::vector<double> time_history_;
     std::vector<std::vector<double>> torque_history_;
-    const size_t max_history_size_ = 2000;
+    const size_t max_history_size_ = 1000;
     // size_t now_size
     std::mutex pic_loc_;
 

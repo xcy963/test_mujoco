@@ -39,7 +39,7 @@ bool MuJoCoROSNode::initialize() {
         RCLCPP_ERROR(this->get_logger(), "Failed to initialize MuJoCo simulator!");
         return false;
     }
-    // 设置步进回调,可以看做这个函数把所有的东西都拿出来了
+    // 设置步进回调,这个函数是步进的一部分，在mujoco计算完毕他的仿真之后执行这个函数
     time_last_ = std::chrono::steady_clock::now();
     simulator_->setStepCallback(
         [this](const mjModel* model, const mjData* data) {
@@ -53,20 +53,27 @@ bool MuJoCoROSNode::initialize() {
                 
                 // CameraRenderer_->list_cameras(model);
                 std::lock_guard<std::mutex> lock(pic_loc_);//防止两个线程发生数据争端
-                time_history_.push_back(data->time);
+                double time_now = data->time;
+                time_history_.push_back(time_now);
+
                 if(torque_history_.size() != model->nv){
+                    torque_history_.clear();
                     torque_history_.resize(model->nv);
                 }
+
                 // 存储关节力矩历史
                 for (int i = 0; i < model->nv; i++) {
                     double this_joint = data->qfrc_actuator[i];
+                    if(std::abs(this_joint)<1e-5){//太小直接给0,这样就不会有轴的问题了
+                        this_joint = 0;
+                    }
                     torque_history_[i].push_back(this_joint);
                 }
 
                 if((time_history_.size() % max_history_size_) == 0 ) {
                     auto time_copy = time_history_;
                     auto torque_copy = torque_history_;
-                    
+                    //第一次优化，这个线程不做画图的处理，只是负责处理数据
                     // time_history_.clear();
                     // torque_history_.clear();
                     
@@ -77,12 +84,12 @@ bool MuJoCoROSNode::initialize() {
                     plot_cv_.notify_one();//因为我们只有一个线程,所以这个使用一个的
                 }
 
-                if((time_history_.size() / max_history_size_) >= 10 ){
+                if((time_history_.size() / max_history_size_) >= 5 ){
                     time_history_.erase(time_history_.begin(), time_history_.begin() + max_history_size_);//删掉前面的这么多个,不然容易内存泄漏
                     for (int i = 0; i < model->nv; i++) {
                         double this_joint = data->qfrc_actuator[i];
                         
-                        torque_history_[i].erase(torque_history_[i].begin(), torque_history_[i].begin() + max_history_size_);
+                        torque_history_[i].erase(torque_history_[i].begin(), torque_history_[i].begin() + max_history_size_);//删除第一个，这样他就平衡了
                     }
                 }
 
@@ -255,13 +262,17 @@ void MuJoCoROSNode::draw_pics(
 
     plt::backend("Agg");
     plt::close();
-    plt::figure_size(1500, 1000);
+    plt::figure_size(1280, 1300);
 
     for (size_t i = 0; i < rows; i++) {
         if (torque_history[i].empty()) {
             RCLCPP_WARN(this->get_logger(), "torque_history[%zu] 为空，跳过绘制", i);
             continue;
         }
+        // RCLCPP_INFO(this->get_logger(), "Joint %zu Torque 范围: [%f, %f]", 
+        //    i, 
+        //    ,
+        //    );
         // RCLCPP_INFO(this->get_logger(), "现在的i是%ld",i);
 
         plt::subplot(rows, 1, i + 1);
@@ -269,10 +280,15 @@ void MuJoCoROSNode::draw_pics(
         std::vector<double> test_x = time_history;
         std::vector<double> test_y = torque_history[i];//直接给会有bug
         std::map<std::string, std::string> keywords;
-        keywords["label"] = std::format("Joint {} Torque",i + 1);
+        double min_ele = *std::min_element(torque_history[i].begin(), torque_history[i].end());
+        double max_ele = *std::max_element(torque_history[i].begin(), torque_history[i].end());
+        keywords["label"] = std::format("max{:.2f},min{:.2f}",max_ele,min_ele);
         plt::plot(time_history,torque_history[i],keywords);//注意这里不能给他加第三个参数,不然subplot会报错
+        plt::ylim(-100, 100);
+        
         plt::xlabel("Time (s)");
         plt::ylabel("Torque (N·m)");
+        // plt::ticklabel_format(axis="y", style="plain"); 
         plt::title(std::format("Joint {} Torque", i + 1));
 
         std::map<std::string, std::string> legend_kw;
