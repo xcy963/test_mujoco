@@ -7,4 +7,9 @@ src/test_mujoco/modules
 /.vscode
 /debug
 
+
+src/test_mujoco/module_temp
 # src/test_mujoco/engineer_module
+
+src/test_mujoco/model2
+src/test_mujoco/engineer_module

@@ -285,7 +285,8 @@ void MuJoCoROSNode::draw_pics(
         keywords["label"] = std::format("max{:.2f},min{:.2f}",max_ele,min_ele);
         plt::plot(time_history,torque_history[i],keywords);//注意这里不能给他加第三个参数,不然subplot会报错
         plt::ylim(-100, 100);
-        
+        // std::vector<double> y_ticks = {-100,  -60,  -20, 0,  20, 60,  100};
+        // plt::yticks(y_ticks);
         plt::xlabel("Time (s)");
         plt::ylabel("Torque (N·m)");
         // plt::ticklabel_format(axis="y", style="plain"); 

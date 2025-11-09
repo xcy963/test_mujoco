@@ -1,6 +1,5 @@
-<mujoco model="1111">
-  <compiler angle="radian" meshdir="meshes/" />
-
+<mujoco model="后仰urdf533mm.SLDASM">
+  <compiler angle="radian"/>
 
   <asset>
     <mesh name="base_link" content_type="model/stl" file="base_link.STL"/>
@@ -16,93 +15,31 @@
     <mesh name="L_ELBOW_LINK" content_type="model/stl" file="L_ELBOW_LINK.STL"/>
   </asset>
 
-  <default>
-    <default class="111urdf">
-      <joint frictionloss="0.1" armature="0.1" />
-      <!-- 在这个里面加ctrl range才是控制ui，里面那个control的 这样才不是-1 到 1 -->
-      <position ctrlrange="-3.14158 3.14158" />
-
-      <default class="J1_class">
-        <joint  axis="0 0 1" range="-1.0 3.14158" armature="0.015"/>
-        <position kp="400" kv="20" forcerange="-80 80"/>
-      </default>
-
-      <default class="J2_class">
-        <joint  axis="0 -1 0" range="-2.9 2.9"  />
-        <position kp="400" kv="100" forcerange="-80 80"/>
-      </default>
-
-      <default class="R_PITCH_class">
-        <joint  axis="0 -1 0" range="-3.14158 3.14158"  />
-        <position kp="350" kv="90" forcerange="-80 80"/>
-      </default>
-
-      <default class="R_ROLL_class">
-        <joint  axis="0 -1 0" range="-3.14158 3.14158"  />
-        <position kp="120" kv="30" forcerange="-80 80"/>
-      </default>
-
-      <default class="R_YAW_class">
-        <joint  axis="0 0 -1" range="-3.14158 3.14158"  />
-        <position kp="60" kv="15" forcerange="-60 60"/>
-      </default>
-
-
-
-      <default class="R_ELBOW_class">
-        <joint  axis="0 0 -1" range="-3.14158 3.14158"  />
-        <position kp="60" kv="15" forcerange="-60 60"/>
-      </default>
-
-      <default class="L_PITCH_class">
-        <joint  axis="-1 0 0" range="-3.14158 3.14158"  />
-        <position kp="40" kv="10" forcerange="-40 40"/>
-      </default>
-
-      <default class="L_ROLL_class">
-        <joint  axis="-1 0 0" range="-3.14158 3.14158"  />
-        <position kp="40" kv="10" forcerange="-40 40"/>
-      </default>
-
-      <default class="L_YAW_class">
-        <joint  axis="-1 0 0" range="-3.14158 3.14158"  />
-        <position kp="40" kv="10" forcerange="-40 40"/>
-      </default>      
-      
-      <default class="L_ELBOW_class">
-        <joint  axis="-1 0 0" range="-3.14158 3.14158"  />
-        <position kp="40" kv="10" forcerange="-40 40"/>
-      </default>
-    </default>
-  </default>
-
   <worldbody>
-    <body name="Base" childclass="111urdf">
-
     <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="base_link"/>
     <body name="LINK1" pos="0 0.1 0">
       <inertial pos="0 0.0297805 0.0704391" quat="0.993189 0.116517 0 0" mass="2.99903" diaginertia="0.0333351 0.032755 0.00481472"/>
-      <joint name="J1" pos="0 0 0" axis="0 -1 0" class="J1_class"/>
+      <joint name="J1" pos="0 0 0" axis="0 -1 0"/>
       <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK1"/>
       <body name="LINK2" pos="0 0 0.26">
         <inertial pos="0.12522 0 0.206061" quat="0.92713 0 0.37474 0" mass="4.56606" diaginertia="0.105848 0.0649343 0.0470742"/>
-        <joint name="J2" pos="0 0 0" axis="0 1 0" class="J2_class"/>
+        <joint name="J2" pos="0 0 0" axis="0 1 0"/>
         <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK2"/>
-        <body name="R_PITCH_LINK" pos="0.196374 -0.2065 0.27397" >
+        <body name="R_PITCH_LINK" pos="0.196374 -0.2065 0.27397">
           <inertial pos="-0.00182923 -0.0416806 0" quat="0.491216 0.508633 -0.491216 0.508633" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
-          <joint name="R_PITCH" pos="0 0 0" axis="0 1 0" class="R_PITCH_class"/>
+          <joint name="R_PITCH" pos="0 0 0" axis="0 1 0"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_PITCH_LINK"/>
           <body name="R_ROLL_LINK" pos="0.032 -0.05 0">
             <inertial pos="-0.0118755 0 -0.0259522" quat="0.974334 0 0.225107 0" mass="0.185288" diaginertia="0.000199458 0.0001911 7.07423e-05"/>
-            <joint name="R_ROLL" pos="0 0 0" axis="-1 0 0" class="R_ROLL_class"/>
+            <joint name="R_ROLL" pos="0 0 0" axis="-1 0 0"/>
             <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_ROLL_LINK"/>
             <body name="R_YAW_LINK" pos="-0.025 0 -0.05">
               <inertial pos="0 -0.026172 -0.0702882" quat="0.951309 -0.308238 0 0" mass="0.970719" diaginertia="0.00251073 0.00242312 0.000485707"/>
-              <joint name="R_YAW" pos="0 0 0" axis="0 0 1" class="R_YAW_class"/>
+              <joint name="R_YAW" pos="0 0 0" axis="0 0 1"/>
               <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_YAW_LINK"/>
               <body name="R_ELBOW_LINK" pos="0 -0.025 -0.107">
                 <inertial pos="0.192059 0.0480684 0" quat="-0.00939337 0.707044 0.00939337 0.707044" mass="2.4894" diaginertia="0.0362676 0.0360807 0.00177081"/>
-                <joint name="R_ELBOW" pos="0 0 0" axis="0 1 0" class="R_ELBOW_class"/>
+                <joint name="R_ELBOW" pos="0 0 0" axis="0 1 0"/>
                 <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_ELBOW_LINK"/>
               </body>
             </body>
@@ -110,47 +47,25 @@
         </body>
         <body name="L_PITCH_LINK" pos="0.196374 0.2065 0.27397">
           <inertial pos="-0.00182923 0.0416806 0" quat="0.508633 0.491216 -0.508633 0.491216" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
-          <joint name="L_PITCH" pos="0 0 0" axis="0 1 0" class="L_PITCH_class"/>
+          <joint name="L_PITCH" pos="0 0 0" axis="0 1 0"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_PITCH_LINK"/>
           <body name="L_ROLL_LINK" pos="0.032 0.05 0">
             <inertial pos="-0.0118755 0 -0.0259522" quat="0.974334 0 0.225107 0" mass="0.185288" diaginertia="0.000199458 0.0001911 7.07423e-05"/>
-            <joint name="L_ROLL" pos="0 0 0" axis="1 0 0" class="L_ROLL_class"/>
+            <joint name="L_ROLL" pos="0 0 0" axis="1 0 0"/>
             <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_ROLL_LINK"/>
             <body name="L_YAW_LINK" pos="-0.025 0 -0.05">
               <inertial pos="0 0.026172 -0.0702882" quat="0.951309 0.308238 0 0" mass="0.970719" diaginertia="0.00251073 0.00242312 0.000485707"/>
-              <joint name="L_YAW" pos="0 0 0" axis="0 0 1" class="L_YAW_class"/>
+              <joint name="L_YAW" pos="0 0 0" axis="0 0 1"/>
               <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_YAW_LINK"/>
               <body name="L_ELBOW_LINK" pos="0 0.025 -0.107">
                 <inertial pos="0.192059 -0.0480684 -1.08341e-12" quat="0.00939337 0.707044 -0.00939337 0.707044" mass="2.4894" diaginertia="0.0362676 0.0360807 0.00177081"/>
-                <joint name="L_ELBOW" pos="0 0 0" axis="0 -1 0" class="L_ELBOW_class"/>
+                <joint name="L_ELBOW" pos="0 0 0" axis="0 -1 0"/>
                 <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_ELBOW_LINK"/>
               </body>
             </body>
           </body>
-        <camera name="wrist_camera" mode="fixed" pos="0.1 0.05 0.02" euler="0 0 0" fovy="75"/>
-
         </body>
       </body>
-      </body>
-
     </body>
   </worldbody>
-
-
-  <actuator>
-    <position class="J1_class" joint="J1" name="pos_joint0"/>
-    <position class="J2_class" joint="J2" name="pos_joint1"/>
-
-    <position class="R_PITCH_class" joint="R_PITCH" name="pos_joint2"/>
-    <position class="R_ROLL_class" joint="R_ROLL" name="pos_joint3"/>
-    <position class="R_YAW_class" joint="R_YAW" name="pos_L_joint4"/>
-    <position class="R_ELBOW_class" joint="R_ELBOW" name="pos_R_joint4"/>
-    
-    <position class="L_PITCH_class" joint="L_PITCH" name="pos_R_joint5"/>
-    <position class="L_ROLL_class" joint="L_ROLL" name="pos_R_joint6"/>
-    <position class="L_YAW_class" joint="L_YAW" name="pos_R_joint7"/>
-    <position class="L_ELBOW_class" joint="L_ELBOW" name="pos_R_joint8"/>
-  </actuator>
-
-
 </mujoco>
