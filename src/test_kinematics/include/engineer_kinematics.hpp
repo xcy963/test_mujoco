@@ -1,9 +1,10 @@
-#pragma once
 #include<vector>
 #include <cmath>
 #include <array>
 #include<iostream>
 #include <eigen3/Eigen/Dense>
+#include "engineer_serial.h"
+
 namespace hitcrt{
 namespace kinematics{
 

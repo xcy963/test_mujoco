@@ -1,0 +1,247 @@
+/*
+  @brief 从寒假就开始预谋的结构体项目,区赛回来之后终于有时间全部搞定了
+    所有的结构体都是3 + x + 2的结构,然后电控的发送其实是十分冗余的,但是这个都是陈年往事了
+*/
+#pragma once
+#include "common.h"
+#include <assert.h>
+#include <cstring>
+#include <cstddef>
+#include <vector>
+#include "verify.h"
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+#define SEND_HEX_DEBUG 0 //控制是否输出发出的16进制
+
+namespace hitcrt{
+namespace ENGINEERstruct{
+#pragma pack(push, 1)
+struct SendToSerial {     // 视觉发给电控
+    uint8_t head[2];      // 2 //55 11
+    uint8_t data_lenth;   // 1 仅仅是第二部分的长度在这里是31
+
+    uint8_t visual_FLAG;  // 要改的 //1     //相机在线是0x11，掉线是0x00 高4位是兑换曹方向，1是兑换曹开口朝向右边 2是朝左
+    uint8_t space;        // 要改的 //1     //矿石检测到是1 没有检测到是0 
+    uint8_t bocchi_FLAG;  // 要改的 //1     //1是松吸盘，0正常执行 
+    uint8_t see_entry_flag; //要改的  1是看到了兑换曹
+    uint8_t ik_flag;        //要改的  1是看到
+    float joints[7];      // 要改的 //28    
+
+    uint8_t tail[2];      // 2 //CRC的值
+};  // 共36
+
+struct ReceiveFromSerial {  // 电控发给视觉的
+    uint8_t head[2];  //2
+    uint8_t data_lenth; //1
+
+    uint8_t flag_lenth;   // 1 //在这里是32,要提醒电控改这个,他这个不对的话视觉这边要改
+    uint8_t float_lenth;  // 1
+    uint8_t flag_task;    // 1 //0是不开始 1是识别矿石 2识别矿槽
+    float joints[7];     // 28 
+    float HWT_ANG;  // 4  
+    float HWT_ANG_V;  // 4  
+    uint16_t left_dis;
+    uint16_t behind_dis;
+    
+
+    uint8_t tail[2];//2 //CRC的值
+};  // 37
+#pragma pack(pop)  // 开这个保证不会自动对齐,他的字节数才对
+/*
+  @brief 下面是两个decode函数
+    配合以前的学长写的通用的函数,实现从串口流的解密
+  @note 一个例子
+    struct SendToSerial {     // 视觉发给电控
+        uint8_t head[2];      // 2 //55 11
+        uint8_t data_lenth;   // 1 //不包括他自己在这里应该是29 //PREFIX_LENGTH3
+
+        uint8_t bocchi_FLAG;  // 要改的 //1 //byte_length 29
+        float joints[7];      // 要改的 //28
+
+        uint8_t tail[2];      // 2 //CRC的值 //SUFFIX_LENGTH 2
+    };  // 共34
+
+    对于这个结构体,输入是第二部分也就是下面两个对应的数组
+        uint8_t bocchi_FLAG;  // 要改的 //1 //byte_length 29
+        float joints[7];      // 要改的 //28
+    填充到结构体里面,然后就可以拿出数据了
+*/
+inline std::pair<u8,std::vector<float>> DECODEsimulator(const VecU8 &data){//模拟的电控那边的解密函数,输出bocchi_FLAG和joints
+  SendToSerial DECODEstruct;
+  assert(data.size()<sizeof(DECODEstruct)-3);
+  u8 *bytes = reinterpret_cast<u8 *>(&DECODEstruct);  // 结构体的指针,其实memcopy好像是一样的
+  for(size_t i=0;i<data.size();i++){
+    bytes[i+3] = data.at(i);
+  }
+  return std::pair(DECODEstruct.bocchi_FLAG,std::vector<float>(DECODEstruct.joints,DECODEstruct.joints+7));
+}
+
+inline std::pair<u8,std::vector<float>> DECODEvisual(const VecU8 &data){//视觉使用的解密函数,输出flag_task,joints
+  ReceiveFromSerial DECODEstruct;
+  assert(data.size()<sizeof(DECODEstruct)-3);
+  u8 *bytes = reinterpret_cast<u8 *>(&DECODEstruct);  // 结构体的指针
+  for(size_t i=0;i<data.size();i++){
+    bytes[i+3] = data.at(i);
+  }
+  // HWT_ANG = DECODEstruct.HWT_ANG;
+  // HWT_ANG_V = DECODEstruct.HWT_ANG_V;
+  // left_dis = DECODEstruct.left_dis;
+  // behind_dis = DECODEstruct.behind_dis;
+  return std::pair(DECODEstruct.flag_task,std::vector<float>(DECODEstruct.joints,DECODEstruct.joints+7));
+}
+
+};  // namespace ENGINEERstruct
+using namespace ENGINEERstruct;
+
+class DataStruct{
+  public:
+
+    DataStruct(){//不初始化对象sizeof也是那么多字节，他似乎是在编译的时候就确定了sizeof()的值
+
+    }
+    void init(){
+      send.head[0] = 0x55; send.head[1] = 0x11;
+      send.data_lenth = sizeof(send)-3-2;//不包括头尾，不包括自己
+      send.visual_FLAG = 0x11;send.space = 0x00;
+      send.bocchi_FLAG = 0x00;
+
+      simulator.head[0] = 0x55;simulator.head[1] = 0x11;
+      simulator.data_lenth = sizeof(simulator)-3-2;//应该是32
+      simulator.flag_lenth = 0x01;simulator.float_lenth = 0x07;
+      simulator.HWT_ANG = 0.0;
+      simulator.HWT_ANG_V = 0.0;
+
+    }
+    // int debug_level = 1;//现在默认是1
+    private:
+    const uint16_t CRC16_INIT = 0xffff;
+    uint8_t last_bocchi = 0x00;
+    SendToSerial send;
+    ReceiveFromSerial simulator;
+  public:
+      void update_SendToSerial_v2(const uint8_t &visual_FLAG,const uint8_t &space,const uint8_t &bocchi_FLAG,const uint8_t &see_entry_flag,
+                                    const uint8_t &ik_flag,const std::vector<float> &joints,std::vector<u8> &buff){//他会给出CRC
+        send.visual_FLAG = visual_FLAG;
+        send.space = space;
+        send.bocchi_FLAG = bocchi_FLAG;
+        send.see_entry_flag = see_entry_flag;
+        send.ik_flag = ik_flag;
+        for(size_t i=0;i<7;i++){
+          send.joints[i] = joints[i];
+        }
+        buff.resize(sizeof(send));
+        const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
+        for (size_t i = 0; i < sizeof(send); i++) {
+            buff[i] = bytes[i];
+            // if()
+        }
+        get_SendCharVec(buff);
+
+    }
+    void update_SendToSerial(const uint8_t &bocchi_FLAG,const std::vector<float> &joints,std::vector<u8> &buff,uint8_t space = 0x00){//他会给出CRC
+
+      send.space = space;//控制是否发送力矩的
+
+      assert(joints.size() == 7);//开始改
+      if(bocchi_FLAG != 0x02){
+        send.bocchi_FLAG = bocchi_FLAG;
+      }
+      // std::cout<<"可能是结构体里面的数组空间不够"<<std::endl;
+      for(size_t i=0;i<7;i++){
+        send.joints[i] = joints[i];
+      }
+      // std::cout<<"他退出了"<<std::endl;
+
+      buff.resize(sizeof(send));
+      const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
+      for (size_t i = 0; i < sizeof(send); i++) {
+          buff[i] = bytes[i];
+          // if()
+      }
+      get_SendCharVec(buff);
+    }
+
+    inline void get_SendCharVec(std::vector<u8>& buff){
+      #if SEND_HEX_DEBUG
+        std::stringstream ss;
+        ss<<"你使用了debug,我接下来会输出我们要发送的数"<<std::endl;
+        for(size_t i=0;i<buff.size();i++){
+          ss<<"第"<< std::dec<<i+1<<"个"<< std::hex<<std::setfill('0') << std::setw(2)<< +buff[i]<<" ";
+          //记录使用加号能强制类型转化,显示才正常，不然使用(int)buff[i]似乎也一样
+        }
+        std::cout<<ss.str();
+      #endif
+
+      uint16_t wExpected = Get_CRC16_Check_Sum(buff.data(), buff.size(), CRC16_INIT);//输出的CRC校验码
+      /*说明：这个是数学意义上的校验吗，但是他实际被写到内存数组里面实际上是高高低低，所以直接去读好像是反的*/
+      buff[buff.size()-2] = wExpected & 0xff;//逻辑低8位，放内存低8位
+      buff[buff.size()-1] = wExpected >> 8;//逻辑高8位，放内存高8位
+
+    }
+
+    inline VecU8 ENCODEsimulator(const u8 &flagtask,const std::vector<float> &joints){
+      assert(joints.size()==(size_t)7);
+      simulator.flag_task = flagtask;
+      for(size_t i=0;i<7;i++){
+        simulator.joints[i] = joints.at(i);
+      }
+      VecU8 encoded;
+      encoded.reserve(sizeof(simulator));
+      const u8* bytes = reinterpret_cast<const u8*>(&simulator);
+      for(size_t i=0;i<sizeof(simulator)-2;i++){//两个帧尾先不放进去
+        encoded[i] = bytes[i];
+      }
+      get_SendCharVec(encoded);
+      return encoded;
+    }
+
+};
+}
+
+//下面是电控代码中的定义
+//-------------------------------USART4-----------------------------------//
+/*发送结构体*/
+// __packed typedef struct
+// {
+// 	uint8_t head[2];	        //2
+
+//   	uint8_t data_lenth;         //1	
+// 	uint8_t flag_lenth;         //1
+//   	uint8_t float_lenth;        //1
+//   	uint8_t flag_task;               //1
+
+// 	float   DATA1[7];	        //28 yaw-LK2-LK1-roll-MIpitch-ENDroll
+// //	float   DATA2[6];	        //24	
+// //	float   DATA3[6];	        //24
+// 		uint8_t spare_data;					//1
+// 	uint8_t tail[2];			//2
+// }USART4_SEND;           		//37
+// /*发送结构体*/
+// __packed typedef struct
+// {
+// 	uint8_t head[2];	        //2
+
+//     uint8_t usart4_rx_lenth;    //1
+// 	uint8_t visual_FLAG;        //1
+// 	uint8_t space ;             //1
+// 	uint8_t bocchi_FLAG;        //1	//兌礦成功的標志位 1為兌礦成功 0為未兌換成                 //1
+// 	float   J0_yaw_angle;	    //4
+// 	float   J1_LK1_angle;		//4
+// 	float   J2_LK2_angle;		//4
+// 	float   J3_roll_angle;	    //4
+// 	float   J4_MIpitch_angle;	//4
+// 	float   J5_ENDpitch_angle;	//4
+// 	float   J6_ENDroll_angle;	//4
+    
+// //	float   J1_yaw_Torque;	    //4
+// //	float   J2_LK2_Torque;		//4
+// //	float   J3_LK1_Torque;		//4
+// //	float   J4_roll_Torque;	    //4
+// //	float   J5_MIpitch_Torque;	//4
+// //	float   J6_ENDroll_Torque;	//4
+
+// 	uint8_t tail[2];			//2
+// }USART4_RECIEVE;       		 	//36//59
+
+

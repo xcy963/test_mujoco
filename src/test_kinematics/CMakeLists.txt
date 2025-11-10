@@ -13,15 +13,20 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
-add_executable(test_kinematics_node src/test_kinematics_node.cpp)
+find_package(OpenCV REQUIRED)
+add_subdirectory(src/engineer_serial)
+add_executable(test_kinematics_node src/main.cpp)
 
 
 target_include_directories(test_kinematics_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+  # ${OpenCV_LIBS} 
 
 target_link_libraries(test_kinematics_node PUBLIC
  Eigen3::Eigen
+ engineer_serial
+ ${OpenCV_LIBS} 
  
 )
 

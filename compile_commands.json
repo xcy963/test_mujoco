@@ -1,9 +1,39 @@
 [
 {
   "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics",
-  "command": "/usr/bin/c++ -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /usr/local/include/eigen3 -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles/test_kinematics_node.dir/src/test_kinematics_node.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/test_kinematics_node.cpp",
-  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/test_kinematics_node.cpp",
-  "output": "CMakeFiles/test_kinematics_node.dir/src/test_kinematics_node.cpp.o"
+  "command": "/usr/bin/c++ -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /usr/local/include/eigen3 -isystem /usr/local/include/opencv4 -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles/test_kinematics_node.dir/src/main.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/main.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/main.cpp",
+  "output": "CMakeFiles/test_kinematics_node.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics/src/engineer_serial",
+  "command": "/usr/bin/c++  -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -std=gnu++20 -Wall -Wextra -Wpedantic -march=native -o CMakeFiles/engineer_serial.dir/engineer_serial.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/engineer_serial.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/engineer_serial.cpp",
+  "output": "src/engineer_serial/CMakeFiles/engineer_serial.dir/engineer_serial.cpp.o"
+},
+{
+  "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics/src/engineer_serial",
+  "command": "/usr/bin/c++  -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -std=gnu++20 -Wall -Wextra -Wpedantic -march=native -o CMakeFiles/engineer_serial.dir/include/serial_device/serial_device.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/include/serial_device/serial_device.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/include/serial_device/serial_device.cpp",
+  "output": "src/engineer_serial/CMakeFiles/engineer_serial.dir/include/serial_device/serial_device.cpp.o"
+},
+{
+  "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics/src/engineer_serial/serial_base",
+  "command": "/usr/bin/c++ -Dserial_base_EXPORTS -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -std=gnu++20 -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/serial_base.dir/serialBase.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/serialBase.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/serialBase.cpp",
+  "output": "src/engineer_serial/serial_base/CMakeFiles/serial_base.dir/serialBase.cpp.o"
+},
+{
+  "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics/src/engineer_serial/serial_base",
+  "command": "/usr/bin/c++ -Dserial_base_EXPORTS -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -std=gnu++20 -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/serial_base.dir/serial_com.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/serial_com.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/serial_com.cpp",
+  "output": "src/engineer_serial/serial_base/CMakeFiles/serial_base.dir/serial_com.cpp.o"
+},
+{
+  "directory": "/home/hitcrt/enginner_26/test_mujoco_ros/build/test_kinematics/src/engineer_serial/serial_base",
+  "command": "/usr/bin/c++ -Dserial_base_EXPORTS -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/include -I/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/include -std=gnu++20 -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/serial_base.dir/verify.cpp.o -c /home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/verify.cpp",
+  "file": "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_kinematics/src/engineer_serial/serial_base/verify.cpp",
+  "output": "src/engineer_serial/serial_base/CMakeFiles/serial_base.dir/verify.cpp.o"
 },
 
 {
