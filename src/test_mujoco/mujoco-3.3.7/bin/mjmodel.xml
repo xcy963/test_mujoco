@@ -1,4 +1,4 @@
-<mujoco model="后仰urdf533mm.SLDASM">
+<mujoco model="后仰urdf700m.SLDASM">
   <compiler angle="radian"/>
 
   <asset>
@@ -18,14 +18,14 @@
   <worldbody>
     <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="base_link"/>
     <body name="LINK1" pos="0 0.1 0">
-      <inertial pos="0 0.0297805 0.0704391" quat="0.993189 0.116517 0 0" mass="2.99903" diaginertia="0.0333351 0.032755 0.00481472"/>
+      <inertial pos="0 0.0329441 0.0493168" quat="0.988386 0.151962 0 0" mass="2.71103" diaginertia="0.0202487 0.019688 0.00431527"/>
       <joint name="J1" pos="0 0 0" axis="0 -1 0"/>
       <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK1"/>
-      <body name="LINK2" pos="0 0 0.26">
-        <inertial pos="0.12522 0 0.206061" quat="0.92713 0 0.37474 0" mass="4.56606" diaginertia="0.105848 0.0649343 0.0470742"/>
+      <body name="LINK2" pos="0 0 0.2">
+        <inertial pos="0.0870968 0 0.144804" quat="0.657182 0.657182 0.260982 -0.260982" mass="3.64301" diaginertia="0.0632331 0.0450017 0.0222116"/>
         <joint name="J2" pos="0 0 0" axis="0 1 0"/>
         <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK2"/>
-        <body name="R_PITCH_LINK" pos="0.196374 -0.2065 0.27397">
+        <body name="R_PITCH_LINK" pos="0.1236 -0.2065 0.18027">
           <inertial pos="-0.00182923 -0.0416806 0" quat="0.491216 0.508633 -0.491216 0.508633" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
           <joint name="R_PITCH" pos="0 0 0" axis="0 1 0"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_PITCH_LINK"/>
@@ -45,7 +45,7 @@
             </body>
           </body>
         </body>
-        <body name="L_PITCH_LINK" pos="0.196374 0.2065 0.27397">
+        <body name="L_PITCH_LINK" pos="0.1236 0.2065 0.18027">
           <inertial pos="-0.00182923 0.0416806 0" quat="0.508633 0.491216 -0.508633 0.491216" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
           <joint name="L_PITCH" pos="0 0 0" axis="0 1 0"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_PITCH_LINK"/>
