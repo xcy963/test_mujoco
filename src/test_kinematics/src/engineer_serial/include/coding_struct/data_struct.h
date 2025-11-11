@@ -16,37 +16,27 @@
 
 namespace hitcrt{
 namespace ENGINEERstruct{
+
 #pragma pack(push, 1)
 struct SendToSerial {     // 视觉发给电控
-    uint8_t head[2];      // 2 //55 11
-    uint8_t data_lenth;   // 1 仅仅是第二部分的长度在这里是31
+    uint8_t head[2];    // 2
+    uint8_t data_lenth; // 1
 
-    uint8_t visual_FLAG;  // 要改的 //1     //相机在线是0x11，掉线是0x00 高4位是兑换曹方向，1是兑换曹开口朝向右边 2是朝左
-    uint8_t space;        // 要改的 //1     //矿石检测到是1 没有检测到是0 
-    uint8_t bocchi_FLAG;  // 要改的 //1     //1是松吸盘，0正常执行 
-    uint8_t see_entry_flag; //要改的  1是看到了兑换曹
-    uint8_t ik_flag;        //要改的  1是看到
-    float joints[7];      // 要改的 //28    
+    float DATA1[3];     // 12 dm_1 dm_2 dm_3
 
-    uint8_t tail[2];      // 2 //CRC的值
-};  // 共36
+    uint8_t tail[2];    // 2
+};  // 共17
 
 struct ReceiveFromSerial {  // 电控发给视觉的
-    uint8_t head[2];  //2
-    uint8_t data_lenth; //1
+    uint8_t head[2];    // 2
+    uint8_t data_lenth; // 1 //在这里是32,要提醒电控改这个,他这个不对的话视觉这边要改
 
-    uint8_t flag_lenth;   // 1 //在这里是32,要提醒电控改这个,他这个不对的话视觉这边要改
-    uint8_t float_lenth;  // 1
-    uint8_t flag_task;    // 1 //0是不开始 1是识别矿石 2识别矿槽
-    float joints[7];     // 28 
-    float HWT_ANG;  // 4  
-    float HWT_ANG_V;  // 4  
-    uint16_t left_dis;
-    uint16_t behind_dis;
-    
+    float DATA1[3];     // 12 dm_1 dm_2 dm_3
 
-    uint8_t tail[2];//2 //CRC的值
-};  // 37
+    uint8_t tail[2];    // 2
+
+
+};  // 17
 #pragma pack(pop)  // 开这个保证不会自动对齐,他的字节数才对
 /*
   @brief 下面是两个decode函数
@@ -67,28 +57,32 @@ struct ReceiveFromSerial {  // 电控发给视觉的
         float joints[7];      // 要改的 //28
     填充到结构体里面,然后就可以拿出数据了
 */
-inline std::pair<u8,std::vector<float>> DECODEsimulator(const VecU8 &data){//模拟的电控那边的解密函数,输出bocchi_FLAG和joints
-  SendToSerial DECODEstruct;
-  assert(data.size()<sizeof(DECODEstruct)-3);
-  u8 *bytes = reinterpret_cast<u8 *>(&DECODEstruct);  // 结构体的指针,其实memcopy好像是一样的
-  for(size_t i=0;i<data.size();i++){
-    bytes[i+3] = data.at(i);
-  }
-  return std::pair(DECODEstruct.bocchi_FLAG,std::vector<float>(DECODEstruct.joints,DECODEstruct.joints+7));
-}
+// inline std::pair<u8,std::vector<float>> DECODEsimulator(const VecU8 &data){//模拟的电控那边的解密函数,输出bocchi_FLAG和joints
+//   SendToSerial DECODEstruct;
+//   assert(data.size()<sizeof(DECODEstruct)-3);
+//   u8 *bytes = reinterpret_cast<u8 *>(&DECODEstruct);  // 结构体的指针,其实memcopy好像是一样的
+//   for(size_t i=0;i<data.size();i++){
+//     bytes[i+3] = data.at(i);
+//   }
+//   return std::pair(DECODEstruct.bocchi_FLAG,std::vector<float>(DECODEstruct.joints,DECODEstruct.joints + 7));
+// }
 
-inline std::pair<u8,std::vector<float>> DECODEvisual(const VecU8 &data){//视觉使用的解密函数,输出flag_task,joints
-  ReceiveFromSerial DECODEstruct;
-  assert(data.size()<sizeof(DECODEstruct)-3);
-  u8 *bytes = reinterpret_cast<u8 *>(&DECODEstruct);  // 结构体的指针
-  for(size_t i=0;i<data.size();i++){
-    bytes[i+3] = data.at(i);
-  }
-  // HWT_ANG = DECODEstruct.HWT_ANG;
-  // HWT_ANG_V = DECODEstruct.HWT_ANG_V;
-  // left_dis = DECODEstruct.left_dis;
-  // behind_dis = DECODEstruct.behind_dis;
-  return std::pair(DECODEstruct.flag_task,std::vector<float>(DECODEstruct.joints,DECODEstruct.joints+7));
+inline std::vector<float> DECODEvisual(
+    const VecU8& data) {  // 视觉使用的解密函数,输出flag_task,joints
+    ReceiveFromSerial DECODEstruct;
+    std::cout<<"这个结构体的大小是: "<<sizeof(DECODEstruct)<<std::endl;
+    assert(data.size() < sizeof(DECODEstruct) - 3);
+    u8* bytes = reinterpret_cast<u8*>(&DECODEstruct);  // 结构体的指针
+    for (size_t i = 0; i < data.size(); i++) {
+        bytes[i + 3] = data.at(i);
+    }
+    // HWT_ANG = DECODEstruct.HWT_ANG;
+    // HWT_ANG_V = DECODEstruct.HWT_ANG_V;
+    // left_dis = DECODEstruct.left_dis;
+    // behind_dis = DECODEstruct.behind_dis;
+    std::vector<float> res_decoded = std::vector<float>(DECODEstruct.DATA1, DECODEstruct.DATA1 + 3);
+    std::cout<<"收到的数据是:1"<<res_decoded[0]<<std::endl;
+    return res_decoded;
 }
 
 };  // namespace ENGINEERstruct
@@ -103,14 +97,14 @@ class DataStruct{
     void init(){
       send.head[0] = 0x55; send.head[1] = 0x11;
       send.data_lenth = sizeof(send)-3-2;//不包括头尾，不包括自己
-      send.visual_FLAG = 0x11;send.space = 0x00;
-      send.bocchi_FLAG = 0x00;
+      // send.visual_FLAG = 0x11;send.space = 0x00;
+      // send.bocchi_FLAG = 0x00;
 
       simulator.head[0] = 0x55;simulator.head[1] = 0x11;
       simulator.data_lenth = sizeof(simulator)-3-2;//应该是32
-      simulator.flag_lenth = 0x01;simulator.float_lenth = 0x07;
-      simulator.HWT_ANG = 0.0;
-      simulator.HWT_ANG_V = 0.0;
+      // simulator.flag_lenth = 0x01;simulator.float_lenth = 0x07;
+      // simulator.HWT_ANG = 0.0;
+      // simulator.HWT_ANG_V = 0.0;
 
     }
     // int debug_level = 1;//现在默认是1
@@ -120,15 +114,14 @@ class DataStruct{
     SendToSerial send;
     ReceiveFromSerial simulator;
   public:
-      void update_SendToSerial_v2(const uint8_t &visual_FLAG,const uint8_t &space,const uint8_t &bocchi_FLAG,const uint8_t &see_entry_flag,
-                                    const uint8_t &ik_flag,const std::vector<float> &joints,std::vector<u8> &buff){//他会给出CRC
-        send.visual_FLAG = visual_FLAG;
-        send.space = space;
-        send.bocchi_FLAG = bocchi_FLAG;
-        send.see_entry_flag = see_entry_flag;
-        send.ik_flag = ik_flag;
+      void update_SendToSerial_v2(const std::vector<float> &joints,std::vector<u8> &buff){//他会给出CRC
+        // send.visual_FLAG = visual_FLAG;
+        // send.space = space;
+        // send.bocchi_FLAG = bocchi_FLAG;
+        // send.see_entry_flag = see_entry_flag;
+        // send.ik_flag = ik_flag;
         for(size_t i=0;i<7;i++){
-          send.joints[i] = joints[i];
+          send.DATA1[i] = joints[i];
         }
         buff.resize(sizeof(send));
         const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
@@ -139,28 +132,28 @@ class DataStruct{
         get_SendCharVec(buff);
 
     }
-    void update_SendToSerial(const uint8_t &bocchi_FLAG,const std::vector<float> &joints,std::vector<u8> &buff,uint8_t space = 0x00){//他会给出CRC
+    // void update_SendToSerial(const uint8_t &bocchi_FLAG,const std::vector<float> &joints,std::vector<u8> &buff,uint8_t space = 0x00){//他会给出CRC
 
-      send.space = space;//控制是否发送力矩的
+    //   send.space = space;//控制是否发送力矩的
 
-      assert(joints.size() == 7);//开始改
-      if(bocchi_FLAG != 0x02){
-        send.bocchi_FLAG = bocchi_FLAG;
-      }
-      // std::cout<<"可能是结构体里面的数组空间不够"<<std::endl;
-      for(size_t i=0;i<7;i++){
-        send.joints[i] = joints[i];
-      }
-      // std::cout<<"他退出了"<<std::endl;
+    //   assert(joints.size() == 7);//开始改
+    //   if(bocchi_FLAG != 0x02){
+    //     send.bocchi_FLAG = bocchi_FLAG;
+    //   }
+    //   // std::cout<<"可能是结构体里面的数组空间不够"<<std::endl;
+    //   for(size_t i=0;i<7;i++){
+    //     send.joints[i] = joints[i];
+    //   }
+    //   // std::cout<<"他退出了"<<std::endl;
 
-      buff.resize(sizeof(send));
-      const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
-      for (size_t i = 0; i < sizeof(send); i++) {
-          buff[i] = bytes[i];
-          // if()
-      }
-      get_SendCharVec(buff);
-    }
+    //   buff.resize(sizeof(send));
+    //   const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
+    //   for (size_t i = 0; i < sizeof(send); i++) {
+    //       buff[i] = bytes[i];
+    //       // if()
+    //   }
+    //   get_SendCharVec(buff);
+    // }
 
     inline void get_SendCharVec(std::vector<u8>& buff){
       #if SEND_HEX_DEBUG
@@ -180,68 +173,47 @@ class DataStruct{
 
     }
 
-    inline VecU8 ENCODEsimulator(const u8 &flagtask,const std::vector<float> &joints){
-      assert(joints.size()==(size_t)7);
-      simulator.flag_task = flagtask;
-      for(size_t i=0;i<7;i++){
-        simulator.joints[i] = joints.at(i);
-      }
-      VecU8 encoded;
-      encoded.reserve(sizeof(simulator));
-      const u8* bytes = reinterpret_cast<const u8*>(&simulator);
-      for(size_t i=0;i<sizeof(simulator)-2;i++){//两个帧尾先不放进去
-        encoded[i] = bytes[i];
-      }
-      get_SendCharVec(encoded);
-      return encoded;
-    }
+    // inline VecU8 ENCODEsimulator(const u8 &flagtask,const std::vector<float> &joints){
+    //   assert(joints.size()==(size_t)7);
+    //   simulator.flag_task = flagtask;
+    //   for(size_t i=0;i<7;i++){
+    //     simulator.joints[i] = joints.at(i);
+    //   }
+    //   VecU8 encoded;
+    //   encoded.reserve(sizeof(simulator));
+    //   const u8* bytes = reinterpret_cast<const u8*>(&simulator);
+    //   for(size_t i=0;i<sizeof(simulator)-2;i++){//两个帧尾先不放进去
+    //     encoded[i] = bytes[i];
+    //   }
+    //   get_SendCharVec(encoded);
+    //   return encoded;
+    // }
 
 };
 }
 
 //下面是电控代码中的定义
 //-------------------------------USART4-----------------------------------//
-/*发送结构体*/
-// __packed typedef struct
+/*电控发给视觉的*/
+// typedef struct
+// {                            
+//     uint8_t head[2];    // 2
+//     uint8_t data_lenth; // 1
+
+//     float DATA1[3];     // 12 dm_1 dm_2 dm_3
+
+//     uint8_t tail[2];    // 2
+// } USART2_SEND;          // 17
+/*视觉发给电控的*/
+// typedef struct
 // {
-// 	uint8_t head[2];	        //2
+//     uint8_t head[2];        // 2
 
-//   	uint8_t data_lenth;         //1	
-// 	uint8_t flag_lenth;         //1
-//   	uint8_t float_lenth;        //1
-//   	uint8_t flag_task;               //1
+//     uint8_t usart4_rxlen;   // 1
 
-// 	float   DATA1[7];	        //28 yaw-LK2-LK1-roll-MIpitch-ENDroll
-// //	float   DATA2[6];	        //24	
-// //	float   DATA3[6];	        //24
-// 		uint8_t spare_data;					//1
-// 	uint8_t tail[2];			//2
-// }USART4_SEND;           		//37
-// /*发送结构体*/
-// __packed typedef struct
-// {
-// 	uint8_t head[2];	        //2
+//     float DM1;              // 4
+//     float DM2;              // 4
+//     float DM3;              // 4
 
-//     uint8_t usart4_rx_lenth;    //1
-// 	uint8_t visual_FLAG;        //1
-// 	uint8_t space ;             //1
-// 	uint8_t bocchi_FLAG;        //1	//兌礦成功的標志位 1為兌礦成功 0為未兌換成                 //1
-// 	float   J0_yaw_angle;	    //4
-// 	float   J1_LK1_angle;		//4
-// 	float   J2_LK2_angle;		//4
-// 	float   J3_roll_angle;	    //4
-// 	float   J4_MIpitch_angle;	//4
-// 	float   J5_ENDpitch_angle;	//4
-// 	float   J6_ENDroll_angle;	//4
-    
-// //	float   J1_yaw_Torque;	    //4
-// //	float   J2_LK2_Torque;		//4
-// //	float   J3_LK1_Torque;		//4
-// //	float   J4_roll_Torque;	    //4
-// //	float   J5_MIpitch_Torque;	//4
-// //	float   J6_ENDroll_Torque;	//4
-
-// 	uint8_t tail[2];			//2
-// }USART4_RECIEVE;       		 	//36//59
-
-
+//     uint8_t tail[2];        // 2
+// } USART2_RECIEVE;           // 17

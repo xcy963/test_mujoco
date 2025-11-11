@@ -48,12 +48,18 @@ auto SerialDevice::receive_a_frame() -> VecU8 {
 
     VecU8 raw_data;
     while (is_running) {//需要有退出的机制,所以是isrunning
+        // std::cout<<"进来接收函数"<<std::endl;
         serial_base_->receive(buff, rcv_length);//TODO最多接收两倍于接收结构体的值,这样会丢帧更厉害马?
-        // std::cout<<"我们这一次接收到这么多"<<rcv_length<<std::endl;
         //具体需要收多少是不一定的,电控发得慢我们就可以少收一点,发得快就多受,基本收2倍以上就没意义了
         VecU8 raw_msg(buff, buff + rcv_length);//转化为u8数组,表示他收到的数据,一般能
-        // std::cout << fmt::format("msg: {:02x}", fmt::join(raw_msg, ", "))
-        //           << std::endl;//这个只是到中间一点点，最后的肯定是0的，不会是crc校验位
+
+        std::stringstream hex_ss;
+        hex_ss << "Hex: ";
+        for (size_t i = 0; i < raw_msg.size(); ++i) { 
+            hex_ss << std::hex << std::setw(2) << std::setfill('0') 
+                << static_cast<int>(raw_msg[i]) << " ";
+        }
+
         if (decoder.append_decode(raw_msg, raw_data)) {
             // std::cout << fmt::format("data: len:{}\n{:02x}", raw_data.size(),
             //                          fmt::join(raw_data, ", "))

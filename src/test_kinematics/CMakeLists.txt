@@ -5,7 +5,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 include_directories(include)
 
 # find dependencies
@@ -14,19 +14,27 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
+
+find_package(Python3 COMPONENTS Development NumPy)
+
 add_subdirectory(src/engineer_serial)
 add_executable(test_kinematics_node src/main.cpp)
 
 
 target_include_directories(test_kinematics_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-  # ${OpenCV_LIBS} 
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+    ${Python3_INCLUDE_DIRS} 
+  ${Python3_NumPy_INCLUDE_DIRS}
+  
+  )
 
 target_link_libraries(test_kinematics_node PUBLIC
  Eigen3::Eigen
  engineer_serial
  ${OpenCV_LIBS} 
+  Python3::Python
+
  
 )
 
@@ -38,6 +46,12 @@ ament_target_dependencies(
 
 install(TARGETS test_kinematics_node
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY
+  launch 
+
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

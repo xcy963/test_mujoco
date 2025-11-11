@@ -64,7 +64,7 @@ bool engineer_kinematics::inverse_kinematics(const Eigen::Isometry3d &T,std::vec
     Eigen::Vector3d vector_V1;
     Eigen::Vector3d vector_V2;
     Eigen::Vector3d vector_V3;
-    std::cout<<"输入的矩阵\n"<<T.matrix()<<std::endl;
+    // std::cout<<"输入的矩阵\n"<<T.matrix()<<std::endl;
 
     bool flag1 = get_3v_fromT(T,vector_V1,vector_V2,vector_V3);
     // std::cout<<"算出来的三个向量\n"<<vector_V1<<"\n第二个\n"<<vector_V2<<"\n第三个\n"<<vector_V3<<std::endl;
@@ -171,7 +171,8 @@ inline bool engineer_kinematics::solve_oneangle(const Eigen::Vector3d &vector_V,
             
             // double angle_other = std::atan2((-b + std::sqrt(delta_fun))/(2 * a),1);//范围是-pi/2到pi/2,选取1 4像限
             // angle_other = std::atan2(angle_other,1);
-            // std::cout<<"对应的另外一个角度是: "<<(angle_other * 2 -yita_[index])*180*M_1_PI<<std::endl;
+            // angle_other = (angle_other * 2 -yita_[index])
+            // std::cout<<"对应的另外一个角度是: "<<angle_other*180*M_1_PI<<std::endl;
             
         }
     }

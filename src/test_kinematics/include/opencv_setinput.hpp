@@ -11,12 +11,12 @@ namespace hitcrt{
 class DoubleTrackbarController {
 private:
     std::string window_name_;
-    cv::Mat display_image_;
+    cv::Size display_size_;
     int max_slider_value_;
+    cv::Mat display_image_;
     std::vector<std::string> variable_names_;
     std::map<std::string, double> variables_;//cpp不知道有没有哈希表
     std::map<std::string, int> slider_values_;
-    cv::Size display_size_;
 
     // 静态回调函数包装器
     static void onTrackbarWrapper(int value, void* userdata) {
@@ -28,14 +28,14 @@ private:
     void onTrackbar(int value, const std::string& var_name) {
         if (slider_values_.find(var_name) != slider_values_.end()) {
             slider_values_[var_name] = value;
-            variables_[var_name] = value / 100.0; // 转换为double，精度0.01
+            variables_[var_name] = (value - max_slider_value_/2.0)/(max_slider_value_/360.0); // 读取到的条上的值是value,保存为角度制度
             updateDisplay();
         }
     }
 
     // 内部数据结构用于回调
     struct TrackbarData {
-        DoubleTrackbarController* controller;
+        DoubleTrackbarController* controller;//自己的指针
         std::string variable_name;
     };
     std::vector<TrackbarData*> trackbar_data_;
@@ -44,7 +44,7 @@ public:
     // 构造函数
     DoubleTrackbarController(const std::string& window_name = "Double Controller", 
                            cv::Size display_size = cv::Size(600, 300),
-                           int max_slider_value = 1000)
+                           int max_slider_value = 36000)
         : window_name_(window_name), display_size_(display_size), 
           max_slider_value_(max_slider_value) {
         display_image_ = cv::Mat::zeros(display_size_, CV_8UC3);
@@ -63,7 +63,7 @@ public:
     void addVariable(const std::string& name, double initial_value = 0.0) {
         variable_names_.push_back(name);
         variables_[name] = initial_value;
-        int initial_slider_value = static_cast<int>(initial_value * 100);
+        int initial_slider_value = static_cast<int>(initial_value * (max_slider_value_/360.0) + max_slider_value_/2.0);
         slider_values_[name] = initial_slider_value;
     }
 
