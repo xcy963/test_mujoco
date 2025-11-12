@@ -3,6 +3,8 @@
 //
 
 #include "include/verify.h"
+#include <iostream>
+#include <iomanip>
 
 /***********************************************************CRC16***********************************************************/
 // clang-format off
@@ -71,6 +73,25 @@ u32 Verify_CRC16_Check_Sum(u8* pchMessage, u32 dwLength) {
     if ((pchMessage == 0) || (dwLength <= 2))
         return 0;
     wExpected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC16_INIT);
+
+    // u8 expected_low = wExpected & 0xff;
+    // u8 expected_high = (wExpected >> 8) & 0xff;
+    // u8 actual_low = pchMessage[dwLength - 2];
+    // u8 actual_high = pchMessage[dwLength - 1];
+    
+    // std::cout << "CRC Debug Information:" << std::endl;
+    // std::cout << "Calculated CRC: 0x" << std::hex << std::setw(2) << std::setfill('0') 
+    //           << static_cast<int>(expected_high) << " "
+    //           << std::setw(2) << std::setfill('0') 
+    //           << static_cast<int>(expected_low) << std::endl;
+    // std::cout << "Actual CRC: 0x" << std::hex << std::setw(2) << std::setfill('0') 
+    //           << static_cast<int>(actual_high) << " "
+    //           << std::setw(2) << std::setfill('0') 
+    //           << static_cast<int>(actual_low) << std::endl;
+
+    // bool result = (expected_low == actual_low && expected_high == actual_high);
+    // std::cout << "CRC Check Result: " << (result ? "PASS" : "FAIL") << std::endl;
+    
     return ((wExpected & 0xff) == pchMessage[dwLength - 2] &&
             ((wExpected >> 8) & 0xff) == pchMessage[dwLength - 1]);
     /*说明：这里其实是inter的小端序即数据有效位的高地址放在内存的高地址端。也就是数学上先被手写出来的部分放在内存的高地址端。
@@ -83,16 +104,16 @@ u32 Verify_CRC16_Check_Sum(u8* pchMessage, u32 dwLength) {
     */
 }
 
-/*************************************************************************
-函 数 名：Append_CRC16_Check_Sum
-函数功能：在输入数组尾添加CRC16检验字
-备    注：dwLength = Data + chechsum
-*************************************************************************/
-void Append_CRC16_Check_Sum(u8* pchMessage, u32 dwLength) {
-    u16 wCRC = 0;
-    if ((pchMessage == 0) || (dwLength <= 2))
-        return;
-    wCRC = Get_CRC16_Check_Sum((u8*)pchMessage, dwLength - 2, CRC16_INIT);
-    pchMessage[dwLength - 2] = (u8)(wCRC & 0x00ff);
-    pchMessage[dwLength - 1] = (u8)((wCRC >> 8) & 0x00ff);//最后的校验
-}
+// /*************************************************************************
+// 函 数 名：Append_CRC16_Check_Sum
+// 函数功能：在输入数组尾添加CRC16检验字
+// 备    注：dwLength = Data + chechsum
+// *************************************************************************/
+// void Append_CRC16_Check_Sum(u8* pchMessage, u32 dwLength) {
+//     u16 wCRC = 0;
+//     if ((pchMessage == 0) || (dwLength <= 2))
+//         return;
+//     wCRC = Get_CRC16_Check_Sum((u8*)pchMessage, dwLength - 2, CRC16_INIT);
+//     pchMessage[dwLength - 2] = (u8)(wCRC & 0x00ff);
+//     pchMessage[dwLength - 1] = (u8)((wCRC >> 8) & 0x00ff);//最后的校验
+// }

@@ -70,7 +70,7 @@ struct ReceiveFromSerial {  // 电控发给视觉的
 inline std::vector<float> DECODEvisual(
     const VecU8& data) {  // 视觉使用的解密函数,输出flag_task,joints
     ReceiveFromSerial DECODEstruct;
-    std::cout<<"这个结构体的大小是: "<<sizeof(DECODEstruct)<<std::endl;
+    // std::cout<<"这个结构体的大小是: "<<sizeof(DECODEstruct)<<std::endl;
     assert(data.size() < sizeof(DECODEstruct) - 3);
     u8* bytes = reinterpret_cast<u8*>(&DECODEstruct);  // 结构体的指针
     for (size_t i = 0; i < data.size(); i++) {
@@ -81,7 +81,7 @@ inline std::vector<float> DECODEvisual(
     // left_dis = DECODEstruct.left_dis;
     // behind_dis = DECODEstruct.behind_dis;
     std::vector<float> res_decoded = std::vector<float>(DECODEstruct.DATA1, DECODEstruct.DATA1 + 3);
-    std::cout<<"收到的数据是:1"<<res_decoded[0]<<std::endl;
+    // std::cout<<"收到的数据是:1"<<res_decoded[0]<<std::endl;
     return res_decoded;
 }
 
@@ -129,7 +129,11 @@ class DataStruct{
             buff[i] = bytes[i];
             // if()
         }
-        get_SendCharVec(buff);
+        uint16_t wExpected = Get_CRC16_Check_Sum(buff.data(), buff.size()-2, CRC16_INIT);//输出的CRC校验码
+        /*说明：这个是数学意义上的校验吗，但是他实际被写到内存数组里面实际上是高高低低，所以直接去读好像是反的*/
+        buff[buff.size()-2] = wExpected & 0xff;//逻辑低8位，放内存低8位
+        buff[buff.size()-1] = wExpected >> 8;//逻辑高8位，放内存高8位
+        // get_SendCharVec(buff);
 
     }
     // void update_SendToSerial(const uint8_t &bocchi_FLAG,const std::vector<float> &joints,std::vector<u8> &buff,uint8_t space = 0x00){//他会给出CRC
@@ -155,23 +159,20 @@ class DataStruct{
     //   get_SendCharVec(buff);
     // }
 
-    inline void get_SendCharVec(std::vector<u8>& buff){
-      #if SEND_HEX_DEBUG
-        std::stringstream ss;
-        ss<<"你使用了debug,我接下来会输出我们要发送的数"<<std::endl;
-        for(size_t i=0;i<buff.size();i++){
-          ss<<"第"<< std::dec<<i+1<<"个"<< std::hex<<std::setfill('0') << std::setw(2)<< +buff[i]<<" ";
-          //记录使用加号能强制类型转化,显示才正常，不然使用(int)buff[i]似乎也一样
-        }
-        std::cout<<ss.str();
-      #endif
+    // inline void get_SendCharVec(std::vector<u8>& buff){
+    //   #if SEND_HEX_DEBUG
+    //     std::stringstream ss;
+    //     ss<<"你使用了debug,我接下来会输出我们要发送的数"<<std::endl;
+    //     for(size_t i=0;i<buff.size();i++){
+    //       ss<<"第"<< std::dec<<i+1<<"个"<< std::hex<<std::setfill('0') << std::setw(2)<< +buff[i]<<" ";
+    //       //记录使用加号能强制类型转化,显示才正常，不然使用(int)buff[i]似乎也一样
+    //     }
+    //     std::cout<<ss.str();
+    //   #endif
+    //   // std::cout<<"debug在结构体加密的时候"<<buff.size()<<std::endl;
 
-      uint16_t wExpected = Get_CRC16_Check_Sum(buff.data(), buff.size(), CRC16_INIT);//输出的CRC校验码
-      /*说明：这个是数学意义上的校验吗，但是他实际被写到内存数组里面实际上是高高低低，所以直接去读好像是反的*/
-      buff[buff.size()-2] = wExpected & 0xff;//逻辑低8位，放内存低8位
-      buff[buff.size()-1] = wExpected >> 8;//逻辑高8位，放内存高8位
 
-    }
+    // }
 
     // inline VecU8 ENCODEsimulator(const u8 &flagtask,const std::vector<float> &joints){
     //   assert(joints.size()==(size_t)7);

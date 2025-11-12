@@ -2,7 +2,8 @@
 // TODO: 锁管理
 #include "serialBase.h"
 #include <shared_mutex>
-
+#include <mutex>
+#include <memory>
 namespace hitcrt {
 class SerialCom {
   protected:

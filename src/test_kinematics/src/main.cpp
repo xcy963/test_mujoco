@@ -249,6 +249,10 @@ int main(int argc, char** argv)
             // }
             // double data = controller_ins->getVariable(jointZ_str);
             // RCLCPP_INFO(node->get_logger(),"现在的角度是%f",data);
+            // if(controller_ins->getVariable(exit_str) < 0 ){
+            //     running.store(false);
+            //     break;
+            // }
         }
 
         std::cout << "\nFinal values:" << std::endl;
@@ -260,10 +264,10 @@ int main(int argc, char** argv)
     // RCLCPP_INFO(node->get_logger(), "不是opencv的问题");
 
     std::thread th_ser;
-    // std::shared_ptr<hitcrt::engineer_serial> temp_ser;
+    std::shared_ptr<hitcrt::engineer_serial> temp_ser;
     // test_joint_limit(temp_ser,instance_ptr,controller_ins);
     try {
-        auto temp_ser = std::make_shared<hitcrt::engineer_serial>("auto", 921600);
+        temp_ser = std::make_shared<hitcrt::engineer_serial>("auto", 921600);
         
         if(temp_ser) {
             th_ser = std::thread([&](){
@@ -271,12 +275,13 @@ int main(int argc, char** argv)
                     std::vector<float> joints;
                     temp_ser->read_once( joints);
 
-                    // std::stringstream ss;
-                    // ss << "读取到的角度值:";
-                    // for(size_t i = 0; i < joints.size(); ++i) {
-                    //     ss << i << ":" << joints[i] << " , ";
-                    // }
-                    // RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
+                    std::stringstream ss;
+                    ss << "读取到的角度值:";
+                    for(size_t i = 0; i < joints.size(); ++i) {
+                        ss << i << ":" << joints[i] << " , ";
+                    }
+                    RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
+
                     std::vector<float> joints_command_float = {1,2,3};
                     joints_command_float.at(0) = controller_ins->getVariable(jointZ_str);
                     joints_command_float.at(1) = controller_ins->getVariable(jointY_str);
@@ -302,17 +307,21 @@ int main(int argc, char** argv)
     }
 
     rclcpp::spin(node);
+    // RCLCPP_INFO(node->get_logger(), "马上要退出");
+
+    running = false;
+
     if(th_ser.joinable()) {
         th_ser.join();
     }
-    
+    if(th_params.joinable()) {
+        th_params.join();
+    } 
     // 清理资源
     running = false;
     // th_params
 
-    if(th_params.joinable()) {
-        th_params.join();
-    }
+
     rclcpp::shutdown();
     return 0;
 }

@@ -94,6 +94,9 @@ namespace hitcrt{
         ~engineer_serial(){
 
             SERIALrunning_flag = false;
+            if (serial_device_) {
+                serial_device_->stop();
+            }
             if(reading_thread_.joinable()){
                 reading_thread_.join();
             }
@@ -106,6 +109,14 @@ namespace hitcrt{
             std::vector<u8> buff;
 
             data_struct_->update_SendToSerial_v2(now_joints,buff);
+            // std::stringstream hex_ss;
+            // // hex_ss << "进入crc之前发送的数据Hex: ";
+            // for (size_t i = 0; i < std::min(buff.size(), size_t(40)); ++i) { // 限制输出前20字节
+            //     hex_ss << std::hex << std::setw(2) << std::setfill('0') 
+            //         << static_cast<int>(buff[i]) << " ";
+            // }
+            // std::cout<<hex_ss.str()<<std::endl;
+
             serial_device_->send(buff,buff.size());
         }
         std::thread reading_thread_;
@@ -117,14 +128,14 @@ namespace hitcrt{
 
         inline void receive_fromserial(){//正常比赛要使用的,接收电控发送给视觉的数据
             std::vector<u8> raw_data = serial_device_->receive_a_frame();//只要满足电控发送视觉的结构体小于80,那么就可以接收
-            std::cout<<"接受到的数组的长度"<<raw_data.size()<<""<<std::endl;
-            std::stringstream hex_ss;
-            hex_ss << "Hex: ";
-            for (size_t i = 0; i < std::min(raw_data.size(), size_t(20)); ++i) { // 限制输出前20字节
-                hex_ss << std::hex << std::setw(2) << std::setfill('0') 
-                    << static_cast<int>(raw_data[i]) << " ";
-            }
-            std::cout<<hex_ss.str()<<std::endl;
+            // std::cout<<"接受到的数组的长度"<<raw_data.size()<<""<<std::endl;
+            // std::stringstream hex_ss;
+            // hex_ss << "Hex: ";
+            // for (size_t i = 0; i < std::min(raw_data.size(), size_t(20)); ++i) { // 限制输出前20字节
+            //     hex_ss << std::hex << std::setw(2) << std::setfill('0') 
+            //         << static_cast<int>(raw_data[i]) << " ";
+            // }
+            // std::cout<<hex_ss.str()<<std::endl;
 
             auto  floats = hitcrt::ENGINEERstruct::DECODEvisual(raw_data);
             

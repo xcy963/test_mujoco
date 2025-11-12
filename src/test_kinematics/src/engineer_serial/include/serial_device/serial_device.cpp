@@ -47,24 +47,29 @@ auto SerialDevice::receive_a_frame() -> VecU8 {
     static u8 buff[RECEIVE_FRAME_LENGTH] = {};//开这么多
 
     VecU8 raw_data;
-    while (is_running) {//需要有退出的机制,所以是isrunning
-        // std::cout<<"进来接收函数"<<std::endl;
+    while (is_running.load()) {//需要有退出的机制,所以是isrunning
         serial_base_->receive(buff, rcv_length);//TODO最多接收两倍于接收结构体的值,这样会丢帧更厉害马?
+        // std::cout<<"收到的长度"<<rcv_length<<std::endl;
         //具体需要收多少是不一定的,电控发得慢我们就可以少收一点,发得快就多受,基本收2倍以上就没意义了
         VecU8 raw_msg(buff, buff + rcv_length);//转化为u8数组,表示他收到的数据,一般能
 
-        std::stringstream hex_ss;
-        hex_ss << "Hex: ";
-        for (size_t i = 0; i < raw_msg.size(); ++i) { 
-            hex_ss << std::hex << std::setw(2) << std::setfill('0') 
-                << static_cast<int>(raw_msg[i]) << " ";
-        }
+        // std::stringstream hex_ss;
+        // hex_ss << "Hex: ";
+        // for (size_t i = 0; i < raw_msg.size(); ++i) { 
+        //     hex_ss << std::hex << std::setw(2) << std::setfill('0') 
+        //         << static_cast<int>(raw_msg[i]) << " ";
+        // }
+        // std::cout<<"收到的长度"<<hex_ss.str()<<std::endl;
 
         if (decoder.append_decode(raw_msg, raw_data)) {
             // std::cout << fmt::format("data: len:{}\n{:02x}", raw_data.size(),
             //                          fmt::join(raw_data, ", "))
             //           << std::endl;
+            // std::cout<<"crc通过"<<std::endl;
             return raw_data;
+        }else{
+            // std::cout<<"crc不通过"<<std::endl;
+
         }
     }
     return {};

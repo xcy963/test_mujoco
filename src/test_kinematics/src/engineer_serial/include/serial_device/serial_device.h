@@ -7,18 +7,23 @@
 #include "serial_com.h"
 #include <iomanip>
 #include <thread>
+#include <atomic> 
 
-using std::placeholders::_1;
+// using std::placeholders::_1;
 
 namespace hitcrt {
 
 class SerialDevice {
   public:
     SerialDevice(const std::string& name, int baudRate);
+    void stop() {
+      is_running.store(false)  ;
+    } // 新增：显式停止方法
     ~SerialDevice(){
-      is_running = false;
+      is_running.store(false)  ;
+
     }
-    bool is_running = true;
+    std::atomic<bool> is_running{true};
   public:
     std::shared_ptr<SerialCom> serial_base_;
 
@@ -29,7 +34,7 @@ class SerialDevice {
     // 这两个函数不涉及ros通信
     // void send(const VecU8&);//老版本的接收,我们不用这个
     void send(std::vector<unsigned char> &data,size_t length);//给struct留下来的接口
-    VecU8 receive_a_frame();//接收函数先不结构体化，我们保守得改革
+    VecU8 receive_a_frame();
 };
 
 } // namespace hitcrt

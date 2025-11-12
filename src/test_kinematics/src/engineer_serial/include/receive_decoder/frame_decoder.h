@@ -13,9 +13,10 @@ Usage:
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <iomanip>
 
-#include <fmt/core.h>
-#include <fmt/ranges.h>
+// #include <fmt/core.h>
+// #include <fmt/ranges.h>
 
 class FrameDecoder {
   public:
@@ -110,8 +111,14 @@ inline bool FrameDecoder::append_decode(const VecU8& buff, VecU8& ret) {
             // fmt::print("temp buff: {:02x}", fmt::join(temp_save_frame, ","));
             
             // check crc
-            // std::cout << fmt::format("要进crc了: {:02x}", fmt::join(temp_save_frame, ", "))
-            //       << std::endl;
+            // std::stringstream  hex_ss;
+            // hex_ss << "Hex: ";
+            // for (size_t i = 0; i < frame_length; ++i) { 
+            //     hex_ss << std::hex << std::setw(2) << std::setfill('0') 
+            //         << static_cast<int>(temp_save_frame[i]) << " ";
+            // }
+
+            // std::cout<<"进入crc之前收到的数据"<<hex_ss.str()<<"debug长度"<<frame_length<<std::endl;
             if (Verify_CRC16_Check_Sum(temp_save_frame, frame_length)) {//数组和总长度传入,注意他传入的是有55 11 和两个尾巴的
                 // std::cout << "CRCSucceeded" << std::endl;
                 ret = VecU8(temp_save_frame + PREFIX_LENGTH,
