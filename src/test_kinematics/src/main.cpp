@@ -43,9 +43,9 @@ void draw_pic(const std::vector<std::vector<float>> &test_angle_res){
     for (const auto &point : test_angle_res) {
         // 确保每个点至少有三个维度（x, y, z）
         if (point.size() >= 3) {
-            x_vals.push_back(point[0]); // 第一个元素作为x坐标
+            z_vals.push_back(point[0]); // 第一个元素作为x坐标
             y_vals.push_back(point[1]); // 第二个元素作为y坐标
-            z_vals.push_back(point[2]); // 第三个元素作为z坐标
+            x_vals.push_back(point[2]); // 第三个元素作为z坐标
         }
     }
 
@@ -57,8 +57,9 @@ void draw_pic(const std::vector<std::vector<float>> &test_angle_res){
     // keywords["linestyle"] = "none";     // 无连线
     keywords["color"] = "blue";         // 蓝色
     keywords["label"] = "joint_pose";      // 图例标签
+    // keywords["s"] = "100"; 
     // 绘制三维散点图
-    plt::scatter(x_vals, y_vals, z_vals,1.0, keywords);
+    plt::scatter(x_vals, y_vals,10.0, keywords);
 
     std::map<std::string, std::string> label_style = {
         {"fontsize", "16"},
@@ -71,7 +72,7 @@ void draw_pic(const std::vector<std::vector<float>> &test_angle_res){
     plt::title("SPACE_distri");
     plt::xlabel("X",label_style);
     plt::ylabel("Y",label_style);
-    plt::zlabel("Z",label_style);
+    // plt::zlabel("Z",label_style);
 
     // 添加网格使观察更直观
     plt::grid(true);
@@ -127,7 +128,7 @@ void test_joint_limit(const std::shared_ptr<hitcrt::engineer_serial> &ser,
     std::vector<std::vector<float>> test_angle_res;//收集电机能到达的位置
 
     bool flag = true;
-    float step = 1.0f;
+    float step = 0.30f;
     float error  = 1.0f;
 
     while(flag && rclcpp::ok()){
@@ -143,6 +144,7 @@ void test_joint_limit(const std::shared_ptr<hitcrt::engineer_serial> &ser,
         test_angle_command.at(2) = controller_ins->getVariable(jointX_str);
 
         //把控制的欧拉角变成矩阵
+        std::cout<<"这个时候的欧拉角joint1:"<<test_angle_command[0]<<" joint2:"<<test_angle_command[1]<<" joint3:"<<test_angle_command[2]<<std::endl;
 
         Eigen::Vector3d euler_angles(test_angle_command.at(0)/180*M_PI, test_angle_command.at(1)/180*M_PI, test_angle_command.at(2)/180*M_PI);
     
@@ -152,30 +154,34 @@ void test_joint_limit(const std::shared_ptr<hitcrt::engineer_serial> &ser,
                         * Eigen::AngleAxisd(euler_angles[2], Eigen::Vector3d::UnitX()).toRotationMatrix();
         Eigen::Isometry3d T = Eigen::Isometry3d::Identity();
         T.rotate(R);
-
+        std::cout<<"看一下矩阵\n"<<R<<std::endl;
         std::vector<double> joints_command;
+
         bool flag_inverse = instance_ptr->inverse_kinematics(T,joints_command);//这个现在还不能接受当前的角度值,以后需要修改这个,让他变得更加理想
         
         if(!flag_inverse){
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
             continue;
         }
         std::cout<<"发送给电控的控制量joint1:"<<joints_command[0]*180*M_1_PI<<" joint2:"<<joints_command[1]*180*M_1_PI<<" joint3:"<<joints_command[2]*180*M_1_PI<<std::endl;
         std::vector<float> joints_command_float;
-        joints_command_float.push_back(static_cast<float>(joints_command[0] * 180 * M_PI));
-        joints_command_float.push_back(static_cast<float>(joints_command[1] * 180 * M_PI));
-        joints_command_float.push_back(static_cast<float>(joints_command[2] * 180 * M_PI));
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
+        joints_command_float.push_back(static_cast<float>(joints_command[0] * 180 * M_1_PI));
+        joints_command_float.push_back(static_cast<float>(joints_command[1] * 180 * M_1_PI));
+        joints_command_float.push_back(static_cast<float>(joints_command[2] * 180 * M_1_PI));
+        
         if(ser){
-            ser->send_once_inter(joints_command_float,step);
-    
+            // ser->send_once_inter(joints_command_float,step);
+            ser->send_once(joints_command_float);
+            
             std::vector<float> joints;
             ser->read_once(joints);//获取电控的反馈,是角度制度
             if(judge_hitpos(joints,joints_command_float,error)){    //过判断,表示电控的现在到给定位置了
                 push_once(test_angle_res,test_angle_command);//注意这里放进去的是欧拉角,不是逆运动学的结果
             }   
-
+            
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 
     }
@@ -205,8 +211,7 @@ std::vector<std::vector<float>> create_joint_trajectory() {
     return trajectory;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("test_kinematicsNODE");
     // auto data = create_joint_trajectory();
@@ -265,29 +270,49 @@ int main(int argc, char** argv)
 
     std::thread th_ser;
     std::shared_ptr<hitcrt::engineer_serial> temp_ser;
-    // test_joint_limit(temp_ser,instance_ptr,controller_ins);
     try {
         temp_ser = std::make_shared<hitcrt::engineer_serial>("auto", 921600);
         
         if(temp_ser) {
             th_ser = std::thread([&](){
                 while(running.load() && rclcpp::ok()) {
-                    std::vector<float> joints;
-                    temp_ser->read_once( joints);
+                    test_joint_limit(temp_ser,instance_ptr,controller_ins);
+                    //这段代码是测试测试和电控的通信的
+                    // std::vector<float> joints_command_float = {1,2,3};
+                    // joints_command_float.at(0) = controller_ins->getVariable(jointZ_str);
+                    // joints_command_float.at(1) = controller_ins->getVariable(jointY_str);
+                    // joints_command_float.at(2) = controller_ins->getVariable(jointX_str);
+                    // temp_ser->send_once(joints_command_float);
 
-                    std::stringstream ss;
-                    ss << "读取到的角度值:";
-                    for(size_t i = 0; i < joints.size(); ++i) {
-                        ss << i << ":" << joints[i] << " , ";
-                    }
-                    RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
+                    // std::stringstream ss_send;
+                    // ss_send << "要发送的角度值:";
+                    // for(size_t i = 0; i < joints_command_float.size(); ++i) {
+                    //     ss_send << i << ":" << joints_command_float[i] << " , ";
+                    // }
+                    // RCLCPP_INFO(node->get_logger(), "%s", ss_send.str().c_str());
 
-                    std::vector<float> joints_command_float = {1,2,3};
-                    joints_command_float.at(0) = controller_ins->getVariable(jointZ_str);
-                    joints_command_float.at(1) = controller_ins->getVariable(jointY_str);
-                    joints_command_float.at(2) = controller_ins->getVariable(jointX_str);
-                    temp_ser->send_once(joints_command_float);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    // std::vector<float> joints;
+                    // temp_ser->read_once( joints);
+
+                    // std::stringstream ss;
+                    // ss << "读取到的角度值:";
+                    // for(size_t i = 0; i < joints.size(); ++i) {
+                    //     ss << i << ":" << joints[i] << " , ";
+                    // }
+                    // RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
+                    // float sum_error = 0.0f;
+                    // std::stringstream ss_error;
+
+                    // for(size_t k = 0;k < joints_command_float.size();k++){
+                    //     float temp_error = std::abs(joints_command_float[k] - joints[k]);
+                    //     ss_error<<"第"<<k + 1<<"个的误差是: "<<temp_error<<" ";
+                    //     sum_error += temp_error;
+                    // }
+                    // ss_error<<"总的误差是"<<sum_error;
+                    // RCLCPP_INFO(node->get_logger(), "%s", ss_error.str().c_str());
+
+
+                    std::this_thread::sleep_for(std::chrono::milliseconds(30));
                     if(controller_ins->getVariable(exit_str) < 0 ){
                         break;
                     }

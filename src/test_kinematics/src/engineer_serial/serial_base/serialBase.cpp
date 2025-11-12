@@ -2,7 +2,7 @@
 
 namespace hitcrt {
 
-SerialBase::SerialBase(std::string str, int baud_rate) : serial_fd(-1) {
+SerialBase::SerialBase(const std::string &str, int baud_rate) : serial_fd(-1) {
     // 打开串口设备
     serial_fd = open(str.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (serial_fd < 0) {

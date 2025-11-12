@@ -95,7 +95,22 @@ bool engineer_kinematics::inverse_kinematics(const Eigen::Isometry3d &T,std::vec
         return false;
     } 
     res.clear();
-    res = {angle1,angle2,angle3};
+    double joint_1 = angle1;
+    double joint_2 = angle2 - angle1;
+    if(joint_2 < - M_PI - 1e-5){
+        joint_2 += 2 * M_PI;
+    }else if(joint_2 > M_PI + 1e-5){
+        joint_2 -= 2 * M_PI;
+    }
+    double joint_3 = angle3 - angle2;
+    if(joint_3 < - M_PI - 1e-5 ){
+        joint_3 += 2 * M_PI;
+    }else if(joint_3 > M_PI + 1e-5){
+        joint_3 -= 2 * M_PI;
+    }
+
+    res = {joint_1,joint_2,joint_3};
+
     return true;
 }
 

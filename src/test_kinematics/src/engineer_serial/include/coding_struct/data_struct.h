@@ -130,65 +130,18 @@ class DataStruct{
             // if()
         }
         uint16_t wExpected = Get_CRC16_Check_Sum(buff.data(), buff.size()-2, CRC16_INIT);//输出的CRC校验码
-        /*说明：这个是数学意义上的校验吗，但是他实际被写到内存数组里面实际上是高高低低，所以直接去读好像是反的*/
         buff[buff.size()-2] = wExpected & 0xff;//逻辑低8位，放内存低8位
         buff[buff.size()-1] = wExpected >> 8;//逻辑高8位，放内存高8位
         // get_SendCharVec(buff);
 
     }
-    // void update_SendToSerial(const uint8_t &bocchi_FLAG,const std::vector<float> &joints,std::vector<u8> &buff,uint8_t space = 0x00){//他会给出CRC
-
-    //   send.space = space;//控制是否发送力矩的
-
-    //   assert(joints.size() == 7);//开始改
-    //   if(bocchi_FLAG != 0x02){
-    //     send.bocchi_FLAG = bocchi_FLAG;
-    //   }
-    //   // std::cout<<"可能是结构体里面的数组空间不够"<<std::endl;
-    //   for(size_t i=0;i<7;i++){
-    //     send.joints[i] = joints[i];
-    //   }
-    //   // std::cout<<"他退出了"<<std::endl;
-
-    //   buff.resize(sizeof(send));
-    //   const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&send);  // 我们结构体的头指针
-    //   for (size_t i = 0; i < sizeof(send); i++) {
-    //       buff[i] = bytes[i];
-    //       // if()
-    //   }
-    //   get_SendCharVec(buff);
-    // }
-
-    // inline void get_SendCharVec(std::vector<u8>& buff){
-    //   #if SEND_HEX_DEBUG
-    //     std::stringstream ss;
-    //     ss<<"你使用了debug,我接下来会输出我们要发送的数"<<std::endl;
-    //     for(size_t i=0;i<buff.size();i++){
-    //       ss<<"第"<< std::dec<<i+1<<"个"<< std::hex<<std::setfill('0') << std::setw(2)<< +buff[i]<<" ";
-    //       //记录使用加号能强制类型转化,显示才正常，不然使用(int)buff[i]似乎也一样
-    //     }
-    //     std::cout<<ss.str();
-    //   #endif
-    //   // std::cout<<"debug在结构体加密的时候"<<buff.size()<<std::endl;
-
-
-    // }
-
-    // inline VecU8 ENCODEsimulator(const u8 &flagtask,const std::vector<float> &joints){
-    //   assert(joints.size()==(size_t)7);
-    //   simulator.flag_task = flagtask;
-    //   for(size_t i=0;i<7;i++){
-    //     simulator.joints[i] = joints.at(i);
-    //   }
-    //   VecU8 encoded;
-    //   encoded.reserve(sizeof(simulator));
-    //   const u8* bytes = reinterpret_cast<const u8*>(&simulator);
-    //   for(size_t i=0;i<sizeof(simulator)-2;i++){//两个帧尾先不放进去
-    //     encoded[i] = bytes[i];
-    //   }
-    //   get_SendCharVec(encoded);
-    //   return encoded;
-    // }
+    
+/*计算机以字节(8位二进制)存储数据,如果要存储uint16_t a = 0x0102 访问内存 高地址位是栈*/
+// -exec p&a
+// $1 = (uint16_t *) 0x7fffffff92e6
+// -exec x/100xb 0x7fffffff92e6
+// 0x7fffffff92e6:	0x02	0x01	0x02	0x00	0x00	0x00	0x00	0x00
+// 0x7fffffff92ee:	0x00	0x00	0xe6	0x92	0xff	0xff	0xff	0x7f
 
 };
 }

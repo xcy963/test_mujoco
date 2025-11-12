@@ -1,5 +1,5 @@
 #pragma once
-//说明这个文件已经非常古董了,他似乎是使用python3.2编写的,但是我的使用年代是python3.12,所以我需要稍微改动一点
+//说明：这个文件已经非常古董了,他似乎是使用python3.2编写的,但是我的使用年代是python3.12,所以我需要稍微改动一点
 // Python headers must be included before any system headers, since
 // they define _POSIX_C_SOURCE
 #include <Python.h>
@@ -19,18 +19,18 @@
 #  define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #  include <numpy/arrayobject.h>
 
-#  ifdef WITH_OPENCV
-#    include <opencv2/opencv.hpp>
-#  endif // WITH_OPENCV
+// #  ifdef WITH_OPENCV//如果要使用opencv，为什么不用cpp版本的呢？
+// #    include <opencv2/opencv.hpp>
+// #  endif // WITH_OPENCV
 
 /*
  * A bunch of constants were removed in OpenCV 4 in favour of enum classes, so
  * define the ones we need here.
  */
-#  if CV_MAJOR_VERSION > 3
-#    define CV_BGR2RGB cv::COLOR_BGR2RGB
-#    define CV_BGRA2RGBA cv::COLOR_BGRA2RGBA
-#  endif
+// #  if CV_MAJOR_VERSION > 3
+// #    define CV_BGR2RGB cv::COLOR_BGR2RGB
+// #    define CV_BGRA2RGBA cv::COLOR_BGRA2RGBA
+// #  endif
 #endif // WITHOUT_NUMPY
 
 #if PY_MAJOR_VERSION >= 3
@@ -1059,36 +1059,36 @@ inline void imshow(const float *ptr, const int rows, const int columns, const in
     detail::imshow((void *) ptr, NPY_FLOAT, rows, columns, colors, keywords, out);
 }
 
-#ifdef WITH_OPENCV
-void imshow(const cv::Mat &image, const std::map<std::string, std::string> &keywords = {})
-{
-    // Convert underlying type of matrix, if needed
-    cv::Mat image2;
-    NPY_TYPES npy_type = NPY_UINT8;
-    switch (image.type() & CV_MAT_DEPTH_MASK) {
-    case CV_8U:
-        image2 = image;
-        break;
-    case CV_32F:
-        image2 = image;
-        npy_type = NPY_FLOAT;
-        break;
-    default:
-        image.convertTo(image2, CV_MAKETYPE(CV_8U, image.channels()));
-    }
+// #ifdef WITH_OPENCV
+// void imshow(const cv::Mat &image, const std::map<std::string, std::string> &keywords = {})
+// {
+//     // Convert underlying type of matrix, if needed
+//     cv::Mat image2;
+//     NPY_TYPES npy_type = NPY_UINT8;
+//     switch (image.type() & CV_MAT_DEPTH_MASK) {
+//     case CV_8U:
+//         image2 = image;
+//         break;
+//     case CV_32F:
+//         image2 = image;
+//         npy_type = NPY_FLOAT;
+//         break;
+//     default:
+//         image.convertTo(image2, CV_MAKETYPE(CV_8U, image.channels()));
+//     }
 
-    // If color image, convert from BGR to RGB
-    switch (image2.channels()) {
-    case 3:
-        cv::cvtColor(image2, image2, CV_BGR2RGB);
-        break;
-    case 4:
-        cv::cvtColor(image2, image2, CV_BGRA2RGBA);
-    }
+//     // If color image, convert from BGR to RGB
+//     switch (image2.channels()) {
+//     case 3:
+//         cv::cvtColor(image2, image2, CV_BGR2RGB);
+//         break;
+//     case 4:
+//         cv::cvtColor(image2, image2, CV_BGRA2RGBA);
+//     }
 
-    detail::imshow(image2.data, npy_type, image2.rows, image2.cols, image2.channels(), keywords);
-}
-#endif // WITH_OPENCV
+//     detail::imshow(image2.data, npy_type, image2.rows, image2.cols, image2.channels(), keywords);
+// }
+// #endif // WITH_OPENCV
 #endif // WITHOUT_NUMPY
 
 template<typename NumericX, typename NumericY>
@@ -1166,7 +1166,7 @@ template<typename NumericX, typename NumericY, typename NumericZ>
 bool scatter(const std::vector<NumericX>& x,
              const std::vector<NumericY>& y,
              const std::vector<NumericZ>& z,
-             const double s=1.0, // The marker size in points**2
+            //  const double s=1.0, // The marker size in points**2
              const std::map<std::string, std::string> & keywords = {},
              const long fig_number=0) {
   detail::_interpreter::get();

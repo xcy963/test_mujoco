@@ -39,16 +39,19 @@ namespace hitcrt{
                 return false;
             }
             std::vector<float> joints_send;
-            float sum = 0.0f;
+            // float sum = 0.0f;
             for(size_t i = 0;i < joints_copy.size();i++){
                 float joint_temp = joints_command[i] - joints_copy[i];
                 joints_send.push_back(joint_temp);
-                sum += std::abs(joint_temp);
+                // sum += std::abs(joint_temp);
             }
+            // sum = std::sqrt(sum);
 
             for(size_t i = 0;i < joints_copy.size();i++){
-                joints_send[i] = (joints_send[i] / sum) * scale + joints_copy[i];//做一个缩放,不让电控那边执行得太猛
+                joints_send[i] = (joints_send[i] ) * scale + joints_copy[i];//做一个缩放,不让电控那边执行得太猛
             }
+            // std::cout<<"发送给电控的控制量joint1:"<<joints_send[0]<<" joint2:"<<joints_send[1]<<" joint3:"<<joints_send[2]<<std::endl;
+
             std::vector<u8> buff;
             // u8 visual = 0;
             // u8 space = 0;

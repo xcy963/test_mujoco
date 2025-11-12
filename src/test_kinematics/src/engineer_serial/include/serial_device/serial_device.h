@@ -25,7 +25,7 @@ class SerialDevice {
     }
     std::atomic<bool> is_running{true};
   public:
-    std::shared_ptr<SerialCom> serial_base_;
+    std::shared_ptr<SerialCom> serial_base_;//com封装了串口的查找
 
     static const size_t RECEIVE_FRAME_LENGTH = FrameDecoder::FRAME_LENGTH;//86B
     // static const size_t SEND_FRAME_LENGTH = FrameEncoder::FRAME_LENGTH;
