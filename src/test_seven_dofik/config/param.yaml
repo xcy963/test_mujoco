@@ -1,0 +1,5 @@
+# config/camera_param.yaml
+
+image_processing_node:
+  ros__parameters:
+    URDF_PATH: ""
