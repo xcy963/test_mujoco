@@ -21,7 +21,7 @@ find_package(OpenCV REQUIRED)
 # pkg_check_modules(EGL REQUIRED egl) # 尝试通过pkg-config查找
 # 查找MuJoCo库。确保它已安装在系统路径，或者通过CMAKE_PREFIX_PATH指定
 # find_package(mujoco REQUIRED) 
-set(MUJOCO_HOME "./mujoco-3.3.7")
+set(MUJOCO_HOME "../../mujoco-3.3.7")
 set(MUJOCO_SIMULATE_DIR "${MUJOCO_HOME}/simulate")
 
 find_path(MUJOCO_INCLUDE_DIRS
@@ -43,8 +43,9 @@ if(NOT MUJOCO_LIBRARIES)
   message(FATAL_ERROR "Failed to find libmujoco.so at ${MUJOCO_HOME}/lib")
 endif()
 
-message(STATUS "Found MuJoCo include at: ${MUJOCO_INCLUDE_DIRS}")
-message(STATUS "Found MuJoCo library: ${MUJOCO_LIBRARIES}")
+message(WARNING "我们手动设置mujuco的头文件还有库地址")
+message(WARNING "Found MuJoCo include at: ${MUJOCO_INCLUDE_DIRS}")
+message(WARNING "Found MuJoCo library: ${MUJOCO_LIBRARIES}")
 
 
 

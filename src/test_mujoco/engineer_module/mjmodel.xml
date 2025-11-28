@@ -1,6 +1,5 @@
-<mujoco model="111">
-      <compiler angle="radian" meshdir="meshes/" />
-
+<mujoco model="后仰urdf150mm.SLDASM">
+  <compiler angle="radian" meshdir="meshes/" />
 
   <asset>
     <mesh name="base_link" content_type="model/stl" file="base_link.STL"/>
@@ -17,9 +16,8 @@
   </asset>
 
 
-
   <default>
-    <default class="111urdf">
+    <!-- <default class="111urdf"> -->
       <joint frictionloss="0.1" armature="0.1" />
       <!-- 在这个里面加ctrl range才是控制ui，里面那个control的 这样才不是-1 到 1 -->
       <position ctrlrange="-3.14158 3.14158" />
@@ -74,22 +72,25 @@
         <joint  axis="-1 0 0" range="-3.14158 3.14158"  />
         <position kp="40" kv="10" forcerange="-40 40"/>
       </default>
-    </default>
+    <!-- </default> -->
   </default>
 
+
   <worldbody>
+    <!-- <body name="Base" childclass="111urdf"> -->
+    
     <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="base_link"/>
     <body name="LINK1" pos="0 0.1 0">
-      <inertial pos="0 0.0329441 0.0493168" quat="0.988386 0.151962 0 0" mass="2.71103" diaginertia="0.0202487 0.019688 0.00431527"/>
+      <inertial pos="0 0.0361438 0.0332956" quat="0.979787 0.200044 0 0" mass="2.47103" diaginertia="0.0126465 0.0121235 0.00387757"/>
       <joint name="J1" pos="0 0 0" axis="0 -1 0" class="J1_class"/>
       <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK1"/>
-      <body name="LINK2" pos="0 0 0.2">
-        <inertial pos="0.0870968 0 0.144804" quat="0.657182 0.657182 0.260982 -0.260982" mass="3.64301" diaginertia="0.0632331 0.0450017 0.0222116"/>
+      <body name="LINK2" pos="0 0 0.15">
+        <inertial pos="0.0721893 0 0.131989" quat="0.661687 0.661687 0.24934 -0.24934" mass="3.42605" diaginertia="0.0569266 0.0446168 0.015982"/>
         <joint name="J2" pos="0 0 0" axis="0 1 0" class="J2_class"/>
         <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LINK2"/>
-        <body name="R_PITCH_LINK" pos="0.1236 -0.2065 0.18027">
+        <body name="R_PITCH_LINK" pos="0.100618 -0.2065 0.160987">
           <inertial pos="-0.00182923 -0.0416806 0" quat="0.491216 0.508633 -0.491216 0.508633" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
-          <joint name="R_PITCH" pos="0 0 0" axis="0 1 0" class="R_PITCH_class"/>
+          <joint name="R_PITCH" pos="0 0 0" axis="0 1 0"  class="R_PITCH_class"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="R_PITCH_LINK"/>
           <body name="R_ROLL_LINK" pos="0.032 -0.05 0">
             <inertial pos="-0.0118755 0 -0.0259522" quat="0.974334 0 0.225107 0" mass="0.185288" diaginertia="0.000199458 0.0001911 7.07423e-05"/>
@@ -107,7 +108,7 @@
             </body>
           </body>
         </body>
-        <body name="L_PITCH_LINK" pos="0.1236 0.2065 0.18027">
+        <body name="L_PITCH_LINK" pos="0.100618 0.2065 0.160987">
           <inertial pos="-0.00182923 0.0416806 0" quat="0.508633 0.491216 -0.508633 0.491216" mass="0.578003" diaginertia="0.00049675 0.000419105 0.000316255"/>
           <joint name="L_PITCH" pos="0 0 0" axis="0 1 0" class="L_PITCH_class"/>
           <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="L_PITCH_LINK"/>
@@ -127,25 +128,27 @@
             </body>
           </body>
         </body>
-      </body>
         <camera name="wrist_camera" mode="fixed" pos="0.1 0.05 0.02" euler="0 0 0" fovy="75"/>
+
+      </body>
+      <!-- </body> -->
 
     </body>
   </worldbody>
 
-    <actuator>
-    <position class="J1_class" joint="J1" name="pos_joint0"/>
-    <position class="J2_class" joint="J2" name="pos_joint1"/>
+      <actuator>
+    <position class="J1_class" joint="J1" name="J1"/>
+    <position class="J2_class" joint="J2" name="J2"/>
 
-    <position class="R_PITCH_class" joint="R_PITCH" name="pos_joint2"/>
-    <position class="R_ROLL_class" joint="R_ROLL" name="pos_joint3"/>
-    <position class="R_YAW_class" joint="R_YAW" name="pos_L_joint4"/>
-    <position class="R_ELBOW_class" joint="R_ELBOW" name="pos_R_joint4"/>
+    <position class="R_PITCH_class" joint="R_PITCH" name="R_PITCH"/>
+    <position class="R_ROLL_class" joint="R_ROLL" name="R_ROLL"/>
+    <position class="R_YAW_class" joint="R_YAW" name="R_YAW"/>
+    <position class="R_ELBOW_class" joint="R_ELBOW" name="R_ELBOW"/>
     
-    <position class="L_PITCH_class" joint="L_PITCH" name="pos_R_joint5"/>
-    <position class="L_ROLL_class" joint="L_ROLL" name="pos_R_joint6"/>
-    <position class="L_YAW_class" joint="L_YAW" name="pos_R_joint7"/>
-    <position class="L_ELBOW_class" joint="L_ELBOW" name="pos_R_joint8"/>
+    <position class="L_PITCH_class" joint="L_PITCH" name="L_PITCH"/>
+    <position class="L_ROLL_class" joint="L_ROLL" name="L_ROLL"/>
+    <position class="L_YAW_class" joint="L_YAW" name="L_YAW"/>
+    <position class="L_ELBOW_class" joint="L_ELBOW" name="L_ELBOW"/>
   </actuator>
 
 </mujoco>

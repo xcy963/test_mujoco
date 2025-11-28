@@ -128,7 +128,7 @@ void test_joint_limit(const std::shared_ptr<hitcrt::engineer_serial> &ser,
     std::vector<std::vector<float>> test_angle_res;//收集电机能到达的位置
 
     bool flag = true;
-    float step = 0.30f;
+    // float step = 0.30f;
     float error  = 1.0f;
 
     while(flag && rclcpp::ok()){
@@ -276,40 +276,40 @@ int main(int argc, char** argv){
         if(temp_ser) {
             th_ser = std::thread([&](){
                 while(running.load() && rclcpp::ok()) {
-                    test_joint_limit(temp_ser,instance_ptr,controller_ins);
+                    // test_joint_limit(temp_ser,instance_ptr,controller_ins);
                     //这段代码是测试测试和电控的通信的
-                    // std::vector<float> joints_command_float = {1,2,3};
-                    // joints_command_float.at(0) = controller_ins->getVariable(jointZ_str);
-                    // joints_command_float.at(1) = controller_ins->getVariable(jointY_str);
-                    // joints_command_float.at(2) = controller_ins->getVariable(jointX_str);
-                    // temp_ser->send_once(joints_command_float);
+                    std::vector<float> joints_command_float = {1,2,3};
+                    joints_command_float.at(0) = controller_ins->getVariable(jointZ_str);
+                    joints_command_float.at(1) = controller_ins->getVariable(jointY_str);
+                    joints_command_float.at(2) = controller_ins->getVariable(jointX_str);
+                    temp_ser->send_once(joints_command_float);
 
-                    // std::stringstream ss_send;
-                    // ss_send << "要发送的角度值:";
-                    // for(size_t i = 0; i < joints_command_float.size(); ++i) {
-                    //     ss_send << i << ":" << joints_command_float[i] << " , ";
-                    // }
-                    // RCLCPP_INFO(node->get_logger(), "%s", ss_send.str().c_str());
+                    std::stringstream ss_send;
+                    ss_send << "要发送的角度值:";
+                    for(size_t i = 0; i < joints_command_float.size(); ++i) {
+                        ss_send << i << ":" << joints_command_float[i] << " , ";
+                    }
+                    RCLCPP_INFO(node->get_logger(), "%s", ss_send.str().c_str());
 
-                    // std::vector<float> joints;
-                    // temp_ser->read_once( joints);
+                    std::vector<float> joints;
+                    temp_ser->read_once( joints);
 
-                    // std::stringstream ss;
-                    // ss << "读取到的角度值:";
-                    // for(size_t i = 0; i < joints.size(); ++i) {
-                    //     ss << i << ":" << joints[i] << " , ";
-                    // }
-                    // RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
-                    // float sum_error = 0.0f;
-                    // std::stringstream ss_error;
+                    std::stringstream ss;
+                    ss << "读取到的角度值:";
+                    for(size_t i = 0; i < joints.size(); ++i) {
+                        ss << i << ":" << joints[i] << " , ";
+                    }
+                    RCLCPP_INFO(node->get_logger(), "%s", ss.str().c_str());
+                    float sum_error = 0.0f;
+                    std::stringstream ss_error;
 
-                    // for(size_t k = 0;k < joints_command_float.size();k++){
-                    //     float temp_error = std::abs(joints_command_float[k] - joints[k]);
-                    //     ss_error<<"第"<<k + 1<<"个的误差是: "<<temp_error<<" ";
-                    //     sum_error += temp_error;
-                    // }
-                    // ss_error<<"总的误差是"<<sum_error;
-                    // RCLCPP_INFO(node->get_logger(), "%s", ss_error.str().c_str());
+                    for(size_t k = 0;k < joints_command_float.size();k++){
+                        float temp_error = std::abs(joints_command_float[k] - joints[k]);
+                        ss_error<<"第"<<k + 1<<"个的误差是: "<<temp_error<<" ";
+                        sum_error += temp_error;
+                    }
+                    ss_error<<"总的误差是"<<sum_error;
+                    RCLCPP_INFO(node->get_logger(), "%s", ss_error.str().c_str());
 
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(30));
