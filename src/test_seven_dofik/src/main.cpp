@@ -36,19 +36,18 @@ void test_identity_tf(const std::unique_ptr<hitcrt::NODEWrapper>& wrapper)
 }
 
 int main(int argc, char** argv){
-    rclcpp::init(argc, argv);
-    auto node = std::make_shared<rclcpp::Node>("ANODE");
-    node->declare_parameter<std::string>("URDF_PATH", "");//一定要先声明才ok
+    // rclcpp::init(argc, argv);
+    // auto node = std::make_shared<rclcpp::Node>("ANODE");
+    // node->declare_parameter<std::string>("URDF_PATH", "");//一定要先声明才ok
 
-    auto wrapper = std::make_unique<hitcrt::NODEWrapper>(node);
-    // wrapper->sendEigenTransform(Eigen::Isometry3d::Identity());
-    std::thread th([&](){
-        test_identity_tf(wrapper);
-    });
-    rclcpp::spin(node);
-    rclcpp::shutdown();
+    // auto wrapper = std::make_unique<hitcrt::NODEWrapper>(node);
+    // // wrapper->sendEigenTransform(Eigen::Isometry3d::Identity());
+    // std::thread th([&](){
+    //     test_identity_tf(wrapper);
+    // });
 
-    throw "something";
+
+    // throw "something";
     hitcrt::DoubleTrackbarController controller("Params");//输入的是窗口名称
 
     controller.addVariable("joint1_deg", 0.0);
@@ -68,5 +67,9 @@ int main(int argc, char** argv){
         // ... 用这些参数做控制/仿真
     }
 
+
+
+        // rclcpp::spin(node);
+    // rclcpp::shutdown();
 }
 

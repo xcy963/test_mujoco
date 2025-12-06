@@ -1,0 +1,74 @@
+<mujoco model="tower_demo">
+  <option timestep="0.002" />
+
+  <!-- 简单资产：只用纯色材质，不用外部文件 -->
+  <asset>
+    <!-- 塔的材质（黑色） -->
+    <material name="tower_mat" rgba="0 0 0 1" />
+
+    <!-- 地面材质（棋盘格） -->
+    <texture name="ground_tex" type="2d" builtin="checker"
+             width="512" height="512"
+             rgb1="0.2 0.3 0.2" rgb2="0.15 0.15 0.15" />
+    <material name="ground_mat" texture="ground_tex" texrepeat="4 4" />
+
+    <!-- 板子的材质（亮黄色，容易看） -->
+    <material name="plate_mat" rgba="0.9 0.8 0.2 1" />
+  </asset>
+
+  <worldbody>
+    <!-- 环境光源 -->
+    <light name="light" pos="0 -3 3" dir="0 1 -1"
+           diffuse="1 1 1" specular="0.3 0.3 0.3" />
+
+    <!-- 一个固定相机，可选 -->
+    <camera name="fixed_cam" pos="0 -4 2" zaxis="0 0 1" />
+
+    <!-- 地面 -->
+    <geom name="floor" type="plane" size="5 5 0.1"
+          material="ground_mat" condim="3" />
+
+    <!-- 黑色塔：高度 1.0，底部在 z=0 -->
+    <body name="tower" pos="0 0 0.5">
+      <!-- cylinder: size="radius half_height" -->
+      <geom name="tower_geom" type="cylinder" size="0.1 0.5"
+            material="tower_mat" />
+
+      <!-- 塔顶：在塔中心再往上 0.5，z=1.0 -->
+      <body name="tower_top" pos="0 0 0.5">
+        <!-- 绕 z 轴旋转的关节 -->
+        <joint name="spin" type="hinge" axis="0 0 1" limited="false" />
+
+        <!-- 四块板子，用 box 几何代替 -->
+        <!-- 圆周半径 R=0.4 -->
+        <!-- box 的 size 是半边长，这里长 0.3、宽 0.1、厚 0.02（实际尺寸） -->
+        <body name="plate1" pos="0.4 0 0">
+          <geom type="box" size="0.15 0.05 0.01"
+                material="plate_mat" mass="0.1" />
+        </body>
+
+        <body name="plate2" pos="0 0.4 0">
+          <geom type="box" size="0.15 0.05 0.01"
+                material="plate_mat" mass="0.1" />
+        </body>
+
+        <body name="plate3" pos="-0.4 0 0">
+          <geom type="box" size="0.15 0.05 0.01"
+                material="plate_mat" mass="0.1" />
+        </body>
+
+        <body name="plate4" pos="0 -0.4 0">
+          <geom type="box" size="0.15 0.05 0.01"
+                material="plate_mat" mass="0.1" />
+        </body>
+
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- 用一个速度电机让 "spin" 关节持续旋转 -->
+  <actuator>
+    <!-- kv=1 时，ctrl 大致就是目标角速度(rad/s) -->
+    <velocity name="spin_motor" joint="spin" kv="1.0" />
+  </actuator>
+</mujoco>
