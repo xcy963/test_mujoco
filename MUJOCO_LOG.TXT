@@ -105,3 +105,27 @@ Element name 'entry', id 2, line 35
 Sat Dec  6 18:34:12 2025
 ERROR: Cannot find actuator 'spin_motor' in model.
 
+Sat Dec  6 19:17:38 2025
+ERROR: Load model error: Error: repeated name 'global_light' in light
+
+Sat Dec  6 19:18:01 2025
+ERROR: Load model error: Error: repeated name 'entry_mat' in material
+
+Sat Dec  6 19:18:20 2025
+ERROR: Load model error: Error: repeated name 'exchanger_mat' in material
+
+Sat Dec  6 19:18:29 2025
+ERROR: Load model error: Error: repeated name 'light_mat' in material
+
+Sat Dec  6 19:18:35 2025
+ERROR: Load model error: Error: Error opening file '/home/hitcrt/enginner_26/test_mujoco_ros/install/mujuco_rotating/share/mujuco_rotating/engineer_module/base_link.STL': No such file or directory
+
+Sat Dec  6 19:19:49 2025
+ERROR: Load model error: Error: Error opening file '/home/hitcrt/enginner_26/test_mujoco_ros/install/mujuco_rotating/share/mujuco_rotating/engineer_module/base_link.STL': No such file or directory
+
+Sat Dec  6 19:21:39 2025
+ERROR: Load model error: Error: Error opening file '/home/hitcrt/enginner_26/test_mujoco_ros/install/mujuco_rotating/share/mujuco_rotating/engineer_module/base_link.STL': No such file or directory
+
+Sat Dec  6 19:22:41 2025
+WARNING: Nan, Inf or huge value in QACC at DOF 6. The simulation is unstable. Time = 1.6960.
+

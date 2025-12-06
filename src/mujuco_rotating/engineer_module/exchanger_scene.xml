@@ -1,0 +1,71 @@
+<mujoco model="exchanger_scene">
+  <!-- 角度用弧度，坐标用 local 系统 -->
+  <compiler angle="radian" coordinate="local" meshdir="meshes"/>
+
+  <option timestep="0.002" />
+
+  <asset>
+    <!-- 这里的 file 路径你换成自己的 -->
+    <mesh name="exchanger_mesh" file="exchanger/exchanger.STL" />
+    <mesh name="entry_mesh"     file="exchanger/entry.STL" />
+    <mesh name="side_light_mesh"  file="exchanger/side_light.STL" />
+    <mesh name="front_light_mesh" file="exchanger/front_light.STL" />
+
+    <!-- 材质：和 URDF 的 white/black/red 对应，再加一点发光 -->
+    <material name="exchanger_mat" rgba="1 1 1 1" />
+    <material name="entry_mat"     rgba="0 0 0 1" />
+    <!-- 灯条：偏红 + emission 让它看起来自己在发光 -->
+    <material name="light_mat" rgba="1 0.2 0.1 1" emission="0.8" specular="0.4" />
+  </asset>
+
+  <worldbody>
+    <!-- 可选地板 -->
+    <geom name="floor" type="plane" size="5 5 0.1" rgba="0.8 0.8 0.8 1" />
+
+
+            <!-- contype="0" conaffinity="0" 会把物体设计为没有碰撞体积的东西 -->
+
+    <!-- exchanger：固定在世界 -->
+     <!-- 这个兑换站是非凸的模型()中空的,mujuco算不了这种,要么换成墙,要么换成没碰撞的,说起来好像兑换曹也是 -->
+    <body name="exchanger" pos="-0.5 0 0" >
+      <geom type="mesh" mesh="exchanger_mesh" material="exchanger_mat" contype="0" conaffinity="0"/>
+      <!-- <geom type="box" size="0.2 0.01 0.3" pos="..." ... />如果想要他是中空的,只能这样再定义一个碰撞的部分 -->
+    </body>
+
+    <!-- entry：顶层 body，带 free joint -->
+    <body name="entry"  pos="-0.5 0 0.700" gravcomp="1">
+      <!-- 这里就是你在代码里用 Eigen 控制的自由关节 -->
+      <joint name="entry_free" type="free" />
+
+      <geom type="mesh" mesh="entry_mesh" material="entry_mat" mass="0.5" />
+
+      <!-- front_lightbar: origin xyz="0 0 0" rpy="0 0 0" -->
+      <body name="front_lightbar" pos="0 0 0" gravcomp="1">
+        <geom type="mesh" mesh="front_light_mesh" material="light_mat" mass="0.1" />
+        <light name="front_light"
+               pos="0 0 0.02" dir="1 0 0"
+               diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
+               cutoff="60" exponent="3" />
+      </body>
+
+      <!-- left_lightbar: xyz="-0.1455 0.144 0", rpy="1.57 0 0" -->
+      <body name="left_lightbar" pos="-0.1455 0.144 0" euler="1.57 0 0" gravcomp="1">
+        <geom type="mesh" mesh="side_light_mesh" material="light_mat" mass="0.05" />
+        <light name="left_light"
+               pos="0 0 0.02" dir="1 0 0"
+               diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
+               cutoff="60" exponent="3" />
+      </body>
+
+      <!-- right_lightbar: xyz="-0.1455 -0.139 0", rpy="1.57 0 0" -->
+      <body name="right_lightbar" pos="-0.1455 -0.139 0" euler="1.57 0 0" gravcomp="1">
+        <geom type="mesh" mesh="side_light_mesh" material="light_mat" mass="0.05" />
+        <light name="right_light"
+               pos="0 0 0.02" dir="1 0 0"
+               diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
+               cutoff="60" exponent="3" />
+      </body>
+
+    </body>
+  </worldbody>
+</mujoco>

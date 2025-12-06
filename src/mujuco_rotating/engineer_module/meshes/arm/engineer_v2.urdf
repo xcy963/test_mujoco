@@ -361,10 +361,10 @@
   </link>
   <joint
     name="Joint5"
-    type="revolute">
+    type="fixed">
     <origin
       xyz="0 0 0"
-      rpy="-1.5708 0 -3.1416" />
+      rpy="-1.5708 1.5708 -3.1416" />
     <parent
       link="Link4" />
     <child
@@ -502,6 +502,7 @@
       damping="0.1"
       friction="0.05" />
   </joint>
+
   <link
     name="LinkC">
     <inertial>
@@ -511,12 +512,12 @@
       <mass
         value="0.167264909952029" />
       <inertia
-        ixx="0.000069"
-        ixy="0.000001"
-        ixz="-0.000001"
-        iyy="0.000450"
-        iyz="-0.000052"
-        izz="0.000711" />
+        ixx="0.000047"
+        ixy="1.4723E-06"
+        ixz="-5.7857E-07"
+        iyy="0.000047"
+        iyz="-1.9532E-06"
+        izz="0.000069" />
     </inertial>
     <visual>
       <origin
@@ -547,8 +548,8 @@
   <joint
     name="Jc"
     type="fixed">
-    <!--劳数据 xyz="0.13418 -0.016215 0.0095" -->
-    <!-- xyz="0.13418 0.033785  0.0125915" -->
+      <!--劳数据 xyz="0.13418 -0.016215 0.0095" -->
+      <!-- xyz="0.13418 0.033785  0.0125915" -->
 
     <origin
       xyz="0.13816  0.0384621 0.0123112"
@@ -560,6 +561,7 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
 
   <!-- 开始补充我的 -->
   <link name="Tuchuan">
@@ -614,63 +616,13 @@
       </geometry>
     </collision>
   </link>
-
-  <link name="Link7_trans_x" />
-  <link name="Link7_trans_y" />
-  <link name="Link7_trans_z" />
-  <link name="Link7_rot_z" />
-  <link name="Link7_rot_y" />
-
-  <!-- 平移X轴 -->
-  <joint name="trans_x" type="prismatic">
+  <joint name="J_box" type="fixed">
     <parent link="Link7" />
-    <child link="Link7_trans_x" />
-    <axis xyz="1 0 0" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-0.1" upper="0.1" effort="100" velocity="0.5" />
-  </joint>
-
-  <!-- 平移Y轴 -->
-  <joint name="trans_y" type="prismatic">
-    <parent link="Link7_trans_x" />
-    <child link="Link7_trans_y" />
-    <axis xyz="0 1 0" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-0.1" upper="0.1" effort="100" velocity="0.5" />
-  </joint>
-
-  <!-- 平移Z轴 -->
-  <joint name="trans_z" type="prismatic">
-    <parent link="Link7_trans_y" />
-    <child link="Link7_trans_z" />
-    <axis xyz="0 0 1" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-0.1" upper="0.1" effort="100" velocity="0.5" />
-  </joint>
-
-  <joint name="rot_z" type="revolute">
-    <parent link="Link7_trans_z" />
-    <child link="Link7_rot_z" />
-    <axis xyz="0 0 1" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-3.14" upper="3.14" effort="100" velocity="0.5" />
-  </joint>
-
-  <!-- 旋转Y轴（Pitch） -->
-  <joint name="rot_y" type="revolute">
-    <parent link="Link7_rot_z" />
-    <child link="Link7_rot_y" />
-    <axis xyz="0 1 0" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-3.14" upper="3.14" effort="100" velocity="0.5" />
-  </joint>
-
-  <!-- 旋转Z轴（Yaw） + 原始固定变换 -->
-  <joint name="rot_x" type="revolute">
-    <parent link="Link7_rot_y" />
     <child link="LinkB" />
-    <axis xyz="1 0 0" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <limit lower="-3.14" upper="3.14" effort="100" velocity="0.5" />
+    <origin
+      xyz="0 0 0 "
+      rpy="0 0 0" />
+    <!-- 图传向着地面看,夹角是10度 -->
   </joint>
+
 </robot>

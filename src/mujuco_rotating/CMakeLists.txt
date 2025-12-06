@@ -5,6 +5,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+# add_compile_options(//开优化
+#      -O3 
+# )
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -15,6 +18,8 @@ find_package(Python3 COMPONENTS Development NumPy)
 find_package(glfw3  REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)   
+find_package(Eigen3 REQUIRED)
+
 
 set(MUJOCO_HOME "../../mujoco-3.3.7")
 set(MUJOCO_SIMULATE_DIR "${MUJOCO_HOME}/simulate")
@@ -89,6 +94,8 @@ target_link_libraries(mujuco_rotating_node
   lodepng
   ${OpenCV_LIBS} 
   mujoco_sim
+  Eigen3::Eigen
+
 )
 
 # 声明ROS2相关的依赖，确保它们出现在头文件和链接路径中

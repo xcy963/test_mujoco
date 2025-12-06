@@ -1,0 +1,30 @@
+<!-- engineer_module/combined_scene.xml -->
+<mujoco model="combined_scene">
+  <compiler angle="radian" coordinate="local" meshdir="meshes" />
+  <option timestep="0.002"/>
+
+  <!-- 公共材质、光源材质等也可以放在这里 -->
+  <asset>
+    <!-- <material name="exchanger_mat" rgba="1 1 1 1" /> -->
+    <!-- <material name="entry_mat"     rgba="0 0 0 1" /> -->
+    <!-- <material name="light_mat"     rgba="1 0.2 0.1 1" emission="0.8" specular="0.4" /> -->
+  </asset>
+
+  <!-- 引入机械臂、兑换站 -->
+  <include file="arm_2025.xml"/>
+  <include file="exchanger_scene.xml"/>
+
+  <!-- 主 worldbody：环境地板、全局光源等 -->
+  <worldbody>
+    <geom type="plane" size="5 5 0.1" rgba="0.8 0.8 0.8 1"/>
+
+    <light name="global_light" pos="0 0 3" dir="0 0 -1"
+           diffuse="0.5 0.5 0.5" specular="0.2 0.2 0.2" />
+
+    <!-- 如果 arm_2025.xml / exchanger_scene.xml 里的 worldbody 结构是这种形式：
+         <worldbody><body ...>...</body></worldbody>
+         那么 include 后，它们的 body 会被直接合并进这里 -->
+  </worldbody>
+
+
+</mujoco>

@@ -4,4 +4,4 @@ find_package(ament_cmake REQUIRED)
 
 ament_package()
 
-install(DIRECTORY launch meshes urdf worlds mujuco_xml config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch meshes urdf mujuco_xml config DESTINATION share/${PROJECT_NAME})

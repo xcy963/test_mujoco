@@ -4,8 +4,8 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('exchanger_des')
-    mujuco_xml_path = os.path.join(pkg_share, 'mujuco_xml', 'exchanger_scene.xml')
+    pkg_share = get_package_share_directory('mujuco_rotating')
+    mujuco_xml_path = os.path.join(pkg_share, 'engineer_module', 'exchanger_arm_scene.xml')
     # dynamic_params = {
     #     'paramfs_path': os.path.join(pkg_share, 'config', 'param.yaml'),
     #     'configfs_path': os.path.join(pkg_share, 'config', 'config.yaml')
