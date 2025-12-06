@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+<robot name="exchanger">
+  <!-- 世界坐标系虚拟链接 -->
+  <!-- <link name="world"/> -->
+  <link name="world"/>
+  
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="exchanger"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 兑换站 -->
+  <link name="exchanger">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+      <material name="black">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- 矿曹 -->
+  <link name="entry">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <link name="left_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_leftLIGHT" type="fixed">
+    <origin xyz="-0.1455 0.144 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="left_lightbar" />
+  </joint>
+
+  <link name="right_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_rightLIGHT" type="fixed">
+    <origin xyz="-0.1455 -0.139 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="right_lightbar" />
+  </joint>
+
+  <!-- 正面左上 -->
+  <link name="front_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/front_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_frontLIGHT" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="entry" />
+    <child link="front_lightbar" />
+  </joint>
+
+  <link name="exchange_px"></link>
+  <link name="exchange_py"></link>
+  <link name="exchange_pz"></link>
+
+  <link name="exchange_ry"></link>
+  <link name="exchange_rz"></link>
+
+  <joint name="J_px" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchanger" />
+    <child link="exchange_px" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.270" upper="0" effort="1000" velocity="1000"/>
+  </joint>
+
+  <joint name="J_py" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchange_px" />
+    <child link="exchange_py" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.255" upper="0.255" effort="1000" velocity="1000"/>
+  </joint>
+
+  <joint name="J_pz" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchange_py" />
+    <child link="exchange_pz" />
+    <axis xyz="0 0 1" />
+    <limit lower="0.720" upper="0.900" effort="1000" velocity="1000"/>
+  </joint>
+
+<!-- 是z y x的旋转 sita fi arfa -->
+  <joint name="J_rz" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchange_pz"/>
+    <child link="exchange_rz"/>  <!-- 修正子链接 -->
+    <axis xyz="0 0 1" />
+    <limit lower="-2.3561925" upper="2.3561925" effort="1000" velocity="1000"/>
+  </joint>
+
+  <joint name="J_ry" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchange_rz"/>
+    <child link="exchange_ry"/>
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="1.570795" effort="1000" velocity="1000"/>
+  </joint>
+
+  <joint name="J_rx" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchange_ry" />
+    <child link="entry" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.78539" upper="0.78539" effort="1000" velocity="1000"/>
+  </joint>
+
+  
+  <gazebo reference="left_lightbar">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="right_lightbar">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="front_lightbar1">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="entry">
+    <gravity>false</gravity><!-- 关闭重力 -->
+    <damping>0.1</damping> <!-- 防止过度振荡 -->
+  </gazebo>
+</robot>

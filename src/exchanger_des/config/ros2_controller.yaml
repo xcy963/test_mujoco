@@ -1,0 +1,15 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+    # use_sim_time: true
+
+# joint_state_broadcaster:
+#   type: joint_state_broadcaster/JointStateBroadcaster
+
+# position_controller:
+#   type: position_controllers/JointGroupPositionController
+#   joints:
+#     - ExchangeToEntry
+#   interface: position
+#   gains:
+#     ExchangeToEntry: {p: 10.0, i: 0.1, d: 0.01}

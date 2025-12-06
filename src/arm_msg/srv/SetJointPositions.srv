@@ -1,6 +1,0 @@
-# 请求
-float64[] positions    # 按 joint_names_ 的顺序给角度
----
-# 响应
-bool success
-string message

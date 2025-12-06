@@ -1,9 +1,15 @@
 #include "mujoco_tower_class.hpp"   // 或者做成 .h + .cpp 分离
+#include <rclcpp/rclcpp.hpp>
 
 int main(int argc, char** argv) {
-    // ros::init(argc, argv, "mujoco_node");
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<rclcpp::Node>("mujuco_rotate");
+    node->declare_parameter<std::string>("model_path", "");
+    std::string model_path = node->get_parameter("model_path").as_string();
+    RCLCPP_INFO_STREAM(node->get_logger(),"使用的模型文件是"<<model_path);
 
-    MujocoOffscreenRenderer renderer("/home/hitcrt/enginner_26/test_mujoco_ros/src/mujuco_rotating/engineer_module/demo.xml", 10.0, 30.0);
+
+    MujocoOffscreenRenderer renderer(model_path, 10.0, 30.0);
 
     renderer.setCameraCallback([&](const unsigned char* rgb, int width,
                                   int height, double t) {
@@ -32,5 +38,12 @@ int main(int argc, char** argv) {
 
     });
 
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    // std::cout << "MuJoCo ROS node started. Press Ctrl+C to exit." << std::endl;
+    std::thread executor_thread([&executor]() {
+        executor.spin();
+    });
     renderer.run();
+    // node.
 }

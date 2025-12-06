@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<robot name="exchanger">
+  <!-- 世界坐标系虚拟链接 -->
+  <!-- <link name="world"/> -->
+  <!-- 在rviz中看的 -->
+
+  <!-- 兑换站 -->
+  <link name="exchanger">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!-- 矿曹 -->
+  <link name="entry">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- <link name="entry_detected">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link> -->
+
+
+
+  <link name="left_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_leftLIGHT" type="fixed">
+    <origin xyz="-0.1455 0.144 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="left_lightbar" />
+  </joint>
+
+  <link name="right_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_rightLIGHT" type="fixed">
+    <origin xyz="-0.1455 -0.139 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="right_lightbar" />
+  </joint>
+
+  <!-- 正面 -->
+  <link name="front_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/front_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_frontLIGHT" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="entry" />
+    <child link="front_lightbar" />
+  </joint>
+
+  <joint name="exchangeTOentry" type="floating">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchanger" />
+    <child link="entry" />
+  </joint>
+
+  <!-- <joint name="exchangeTOentrydetected" type="floating">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchanger" />
+    <child link="entry_detected" />
+  </joint> -->
+  <!-- entry_vision -->
+</robot>

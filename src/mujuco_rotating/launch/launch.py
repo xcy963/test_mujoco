@@ -4,8 +4,8 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    # pkg_share = get_package_share_directory('engineer_auto')
-    # config_path = os.path.join(pkg_share, 'config', 'camera_param.yaml')
+    pkg_share = get_package_share_directory('exchanger_des')
+    mujuco_xml_path = os.path.join(pkg_share, 'mujuco_xml', 'exchanger_scene.xml')
     # dynamic_params = {
     #     'paramfs_path': os.path.join(pkg_share, 'config', 'param.yaml'),
     #     'configfs_path': os.path.join(pkg_share, 'config', 'config.yaml')
@@ -21,7 +21,7 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {
-                    "model_path":"/home/hitcrt/enginner_26/test_mujoco_ros/src/mujuco_rotating/engineer_module/tower_scene.xml"
+                    "model_path":mujuco_xml_path
                 # "/home/hitcrt/enginner_26/test_mujoco_ros/src/test_mujoco/modules/trs_so_arm100/scene.xml
 
                 }

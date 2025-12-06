@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<robot name="exchanger">
+  <!-- 世界坐标系虚拟链接 -->
+  <!-- <link name="world"/> -->
+  <link name="world"/>
+  
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="exchanger"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 兑换站 -->
+  <link name="exchanger">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/exchanger.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+
+
+  <link name="left_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_leftLIGHT" type="fixed">
+    <origin xyz="-0.1455 0.144 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="left_lightbar" />
+  </joint>
+
+  <link name="right_lightbar">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/side_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_rightLIGHT" type="fixed">
+    <origin xyz="-0.1455 -0.139 0" rpy="1.57 0 0" />
+    <parent link="entry" />
+    <child link="right_lightbar" />
+  </joint>
+
+<!-- 正面左上 -->
+  <link name="front_lightbar1">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/front_light.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="J_frontLIGHT1" type="fixed">
+    <origin xyz="0 -0.137 0.137" rpy="3.14 1.57 0" />
+    <parent link="entry" />
+    <child link="front_lightbar1" />
+  </joint>
+
+  <joint name="ExchangeToEntry" type="floating">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="exchanger" />
+    <child link="entry" />
+  </joint>
+
+
+  <!-- 矿曹 -->
+  <link name="entry">
+    <visual>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://exchanger_des/meshes/entry.STL"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <transmission name="trans_ExchangeToEntry">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="ExchangeToEntry">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="virtual_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <gazebo reference="left_lightbar">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="right_lightbar">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="front_lightbar1">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="entry">
+    <gravity>false</gravity><!-- 关闭重力 -->
+    <damping>0.1</damping> <!-- 防止过度振荡 -->
+  </gazebo>
+
+  <ros2_control name="exchanger_control" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      <!-- 添加参数确保Gazebo插件正确加载 -->
+      <param name="robot_param">robot_description</param>
+    </hardware>
+    <joint name="ExchangeToEntry">
+      <!-- 浮动关节需要6个自由度的控制接口 -->
+      <command_interface name="position"/>
+      <command_interface name="velocity"/> <!-- 可选但推荐 -->
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- 必需：添加Gazebo ROS2控制插件 -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+    </plugin>
+  </gazebo>
+  
+</robot>

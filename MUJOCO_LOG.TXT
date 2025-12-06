@@ -94,3 +94,14 @@ ERROR: gladLoadGL error
 Sat Nov  1 20:36:07 2025
 WARNING: Nan, Inf or huge value in QACC at DOF 5. The simulation is unstable. Time = 0.0580.
 
+Sat Dec  6 18:31:17 2025
+ERROR: Load model error: Error: free joint can only be used on top level
+Element name 'entry', id 2, line 35
+
+Sat Dec  6 18:32:21 2025
+ERROR: Load model error: Error: free joint can only be used on top level
+Element name 'entry', id 2, line 35
+
+Sat Dec  6 18:34:12 2025
+ERROR: Cannot find actuator 'spin_motor' in model.
+

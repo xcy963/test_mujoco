@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exchanger_des</name>
+  <version>2.0.7</version>
+  <description>
+    <p>URDF Description package for exchanger_des</p>
+    <p>This package contains configuration data, 3D models and launch files
+for exchanger_des robot</p>
+  </description>
+  <author>TODO</author>
+
+  <maintainer email="dave@dav.ee">Dave Coleman</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>engineer_msgs</depend>
+  <depend>gazebo_ros</depend>
+  <depend>gazebo_ros2_control</depend>
+  <depend>gazebo_dev</depend>
+  <export>
+      <build_type>ament_cmake</build_type>
+  </export>
+</package>
