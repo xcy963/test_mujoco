@@ -46,12 +46,20 @@
             euler="1.57079534  0.26179367 1.57080013">
             <geom type="mesh" mesh="LinkC" rgba="1 1 1 1" />
             <!-- euler="1.83259 -1.5708 0"> -->
+             <!-- 这个定义是xyz欧拉角，但是urdf是xyz固定角 -->
 
-            <!-- 真正要用的机载相机 -->
+            <!-- 真正要用的机载相机,旋转是为了调整相机的坐标系为我们常用的那个定义 -->
             <camera name="arm_cam"
               pos="0 0 0"
               euler="0 3.14159 3.14159"
-              fovy="60" />
+              resolution="1920 1080"
+
+              focalpixel="640.9734 641.0952"
+              principalpixel="-317.9608 -133.6433"
+              sensorsize="1 1" />
+            <!-- https://docs.mujoco.cn/en/stable/XMLreference.html#body-camera-principal -->
+             <!-- 这个principalpixel是相对于中央的偏移cx` = cx-1920/2=k(0,2) - 960 cy -->
+              <!-- focalpixel fx fy -->
           </body>
 
 

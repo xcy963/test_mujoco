@@ -3,6 +3,7 @@
 // 1) 相机回调（OpenCV 显示/录制）；
 // 2) 控制回调（外部控制机械臂电机 d->ctrl[]）；
 // 3) 兑换站 entry_free 位姿接口（使用 Eigen）。
+#pragma once
 
 #include <GLFW/glfw3.h>
 #include <mujoco/mujoco.h>
@@ -25,9 +26,9 @@ GLFWwindow* g_window = nullptr;
 
 class MujocoOffscreenRenderer {
    public:
-    // 相机回调：给你 RGB 图像 + 宽高 + 仿真时间
+    // 相机回调：给 RGB 图像 + 宽高 + 仿真时间
     using CameraCallback =
-        std::function<void(const unsigned char*, int, int, double)>;
+        std::function<void(const unsigned char*,const float*, int, int, double)>;
     // 控制回调：每个仿真步调用一次，你在里面写 d->ctrl / 改 qpos 等
     using ControlCallback = std::function<void(mjModel*, mjData*, double)>;
 
@@ -37,12 +38,13 @@ class MujocoOffscreenRenderer {
         running_.store(true);
         initOpenGL();
         initMuJoCo();
-        setupOffscreen();
+        // setupOffscreen();
     }
 
     ~MujocoOffscreenRenderer() { cleanup(); }
 
     void set_running(const bool& flag) { running_.store(flag); }
+    //记得在run之前需要设置一遍这个
     void useFixedCamera(const std::string& cam_name) {
       int cam_id = mj_name2id(m_, mjOBJ_CAMERA, cam_name.c_str());
       if (cam_id < 0) {
@@ -51,6 +53,8 @@ class MujocoOffscreenRenderer {
       }
       cam_.type = mjCAMERA_FIXED;
       cam_.fixedcamid = cam_id;
+    //   setupOffscreen();
+        setupOffscreenWithCamera(cam_id);
     }
     // 设置用户的相机回调
     void setCameraCallback(CameraCallback cb) {
@@ -111,12 +115,12 @@ class MujocoOffscreenRenderer {
                                 &scn_);
                 // 渲染到当前 framebuffer
                 mjr_render(viewport_, &scn_, &con_);
-                // 读出像素（只要 RGB，不要 depth）
-                mjr_readPixels(rgb_buffer_, nullptr, viewport_, &con_);
+                // 读出像素（只要 RGB,depth分辨率默认是一样的,额这个无所谓把,反正转化也不是我们写的）
+                mjr_readPixels(rgb_buffer_, depth_buffer_, viewport_, &con_);
 
                 // 相机回调
                 if (camera_callback_) {
-                    camera_callback_(rgb_buffer_, width_, height_, d_->time);
+                    camera_callback_(rgb_buffer_,depth_buffer_, width_, height_, d_->time);
                 }
 
                 frametime = d_->time;
@@ -223,7 +227,44 @@ class MujocoOffscreenRenderer {
         // Linux + NV 驱动有时 glfwTerminate 会崩，这里可以视情况调用
 
     }
+    void setupOffscreenWithCamera(int cam_id) {
+        mjr_setBuffer(mjFB_OFFSCREEN, &con_);
 
+        // 从模型里读这个相机的 resolution（2 ints: [w, h]）
+        int cam_w = m_->cam_resolution[2 * cam_id + 0];
+        int cam_h = m_->cam_resolution[2 * cam_id + 1];
+
+        if (cam_w <= 0 || cam_h <= 0) {
+            // 没设置就给个默认
+            cam_w = 640;
+            cam_h = 480;
+        }
+
+        // 调整离屏 framebuffer 大小（MuJoCo 3.x 里有 mjr_resizeOffscreen）
+        mjr_resizeOffscreen(cam_w, cam_h, &con_);
+
+        // // 配置 scene 的输出分辨率（重要：在 mjv_updateScene 前设置）
+        // scn_.offwidth  = cam_w;
+        // scn_.offheight = cam_h;
+
+        // 设置 viewport,他只是一个结构体而以
+        viewport_.left   = 0;
+        viewport_.bottom = 0;
+        viewport_.width  = cam_w;
+        viewport_.height = cam_h;
+
+        width_  = cam_w;
+        height_ = cam_h;
+
+        // 重新分配 buffer
+        if (rgb_buffer_) std::free(rgb_buffer_);
+        rgb_buffer_ = (unsigned char*)std::malloc(3 * width_ * height_);
+
+        if (depth_buffer_) std::free(depth_buffer_);
+        depth_buffer_ = (float*)std::malloc(width_ * height_ * sizeof(float));
+
+        std::printf("Offscreen viewport: %d x %d\n", width_, height_);
+    }
     //---------------- 离屏渲染相关 ----------------
     void setupOffscreen() {
         mjr_setBuffer(mjFB_OFFSCREEN, &con_);
@@ -233,7 +274,7 @@ class MujocoOffscreenRenderer {
                 "using default/window framebuffer\n");
         }
 
-        viewport_ = mjr_maxViewport(&con_);
+        viewport_ = mjr_maxViewport(&con_);//这个不好用
         width_ = viewport_.width;
         height_ = viewport_.height;
 
@@ -242,6 +283,8 @@ class MujocoOffscreenRenderer {
             mju_error("Could not allocate RGB buffer");
         }
 
+        depth_buffer_ = (float*)std::malloc(4*width_*height_);
+
         std::printf("Viewport: %d x %d\n", width_, height_);
     }
 
@@ -249,6 +292,12 @@ class MujocoOffscreenRenderer {
         if (rgb_buffer_) {
             std::free(rgb_buffer_);
             rgb_buffer_ = nullptr;
+        }
+
+        if(depth_buffer_){
+            std::free(depth_buffer_);
+            depth_buffer_ = nullptr;
+
         }
         closeMuJoCo();
         closeOpenGL();
@@ -282,6 +331,8 @@ class MujocoOffscreenRenderer {
     int width_ = 0;
     int height_ = 0;
     unsigned char* rgb_buffer_ = nullptr;
+    float* depth_buffer_ = nullptr;
+
 
     // 用户回调
     CameraCallback camera_callback_;

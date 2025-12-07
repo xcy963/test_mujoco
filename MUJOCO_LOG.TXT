@@ -129,3 +129,8 @@ ERROR: Load model error: Error: Error opening file '/home/hitcrt/enginner_26/tes
 Sat Dec  6 19:22:41 2025
 WARNING: Nan, Inf or huge value in QACC at DOF 6. The simulation is unstable. Time = 1.6960.
 
+Sun Dec  7 14:52:52 2025
+ERROR: Load model error: XML Error: required attribute missing: 'sensorsize'
+Element 'camera', line 0
+
+

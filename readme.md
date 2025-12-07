@@ -15,6 +15,10 @@
 - 使用`const std::map<std::string, std::string>& keywords` 作为参数,像python那样子传递参数
         
 
+
+## 关于相机的部分:
+- [相机的描述的链接,记得锁定元素body-camera-principal](https://docs.mujoco.cn/en/stable/XMLreference.html#body-camera-principal)
+
 ## 关于加力矩,
 ### 1 按住ctrl 鼠标左键是旋转力矩
 ### 2 按住ctrl 鼠标右键是带方向的力

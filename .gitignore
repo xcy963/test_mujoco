@@ -15,3 +15,5 @@ src/test_mujoco/model2
 src/test_mujoco/engineer_module
 
 compile_commands.json
+
+fov_matrix.py
