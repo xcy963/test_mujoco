@@ -23,8 +23,12 @@
 ### 1 按住ctrl 鼠标左键是旋转力矩
 ### 2 按住ctrl 鼠标右键是带方向的力
 
+## 如果想要
+
 ## 常用的快捷键
+> 根据xcy的习惯,现在simulate程序里面把仿真环境调好了会好一点,之后代码只是验证控制的
 1. ctrl + A 是视角快速回到初始位置
-2. `是显示AABB(最小外接矩形)
-3. 调试坐标系可以在,这个label立选body![alt text](image.png)
+2. `是显示AABB(最小外接矩形)，这个就是碰撞体积
+3. 调试坐标系可以在,这个label立选body![alt text](./images/image.png)
+   - 如果想要坐标系小一点,调整visual里面的scale ![看我](./images/image-1.png) 
 4. 

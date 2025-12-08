@@ -33,37 +33,38 @@
     </body>
 
     <!-- entry：顶层 body，带 free joint -->
-    <body name="entry"  pos="-0.5 0 0.700" gravcomp="1">
+    <body name="entry"  pos="-0.7 0 0.700" gravcomp="1">
+      <!-- gravcomp是关闭重力 -->
       <!-- 这里就是你在代码里用 Eigen 控制的自由关节 -->
       <joint name="entry_free" type="free" />
 
-      <geom type="mesh" mesh="entry_mesh" material="entry_mat" mass="0.5" />
+      <geom type="mesh" mesh="entry_mesh" material="entry_mat" mass="0.5" contype="0" conaffinity="0"/>
 
       <!-- front_lightbar: origin xyz="0 0 0" rpy="0 0 0" -->
       <body name="front_lightbar" pos="0 0 0" gravcomp="1">
         <geom type="mesh" mesh="front_light_mesh" material="light_mat" mass="0.1" />
-        <light name="front_light"
+        <!-- <light name="front_light"
                pos="0 0 0.02" dir="1 0 0"
                diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
-               cutoff="60" exponent="3" />
+               cutoff="60" exponent="3" /> -->
       </body>
 
       <!-- left_lightbar: xyz="-0.1455 0.144 0", rpy="1.57 0 0" -->
       <body name="left_lightbar" pos="-0.1455 0.144 0" euler="1.57 0 0" gravcomp="1">
         <geom type="mesh" mesh="side_light_mesh" material="light_mat" mass="0.05" />
-        <light name="left_light"
+        <!-- <light name="left_light"
                pos="0 0 0.02" dir="1 0 0"
                diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
-               cutoff="60" exponent="3" />
+               cutoff="60" exponent="3" /> -->
       </body>
 
       <!-- right_lightbar: xyz="-0.1455 -0.139 0", rpy="1.57 0 0" -->
       <body name="right_lightbar" pos="-0.1455 -0.139 0" euler="1.57 0 0" gravcomp="1">
         <geom type="mesh" mesh="side_light_mesh" material="light_mat" mass="0.05" />
-        <light name="right_light"
+        <!-- <light name="right_light"
                pos="0 0 0.02" dir="1 0 0"
                diffuse="1 0.3 0.3" specular="0.5 0.5 0.5"
-               cutoff="60" exponent="3" />
+               cutoff="60" exponent="3" /> -->
       </body>
 
     </body>

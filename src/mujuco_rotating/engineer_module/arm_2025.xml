@@ -1,5 +1,5 @@
 <mujoco model="engineer">
-  <compiler angle="radian"/>
+  <compiler angle="radian" meshdir="meshes"/>
 
   <default>
     <!-- 给所有关节一点阻尼和转动惯量，防止抖 -->
@@ -23,10 +23,77 @@
   </asset>
 
   <worldbody>
-    <!-- md机械给的鸟图link1和link2有干涉🖕,手动关掉碰撞检测 -->
+    <!-- md鸟图link1和link2有干涉🖕,手动关掉碰撞检测 -->
     <!-- <geom size="2.5 2.5 0.005" type="box" rgba="0.7 0.7 0.7 1"/> -->
-    <geom type="mesh" rgba="1 1 1 1" mesh="base_link" contype="0" conaffinity="0"/>
-    <body name="Link1" pos="0.084918 -2.5632e-05 0.2789" euler="0 0 3.14159265">
+  <geom name="ground" type="plane"
+        size="5 5 0.1"
+        pos="0 0 0"
+        rgba="0.7 0.7 0.7 1"/>
+        <!-- 调试临时加一个地面 -->
+  <!-- 差速底盘：带一个 free 关节，让整个车能在地面上运动 -->
+  <body name="base" pos="0 0 0.1" euler="0 0 3.1415926">
+    <inertial pos="0 0 0" mass="20" diaginertia="2 2 2"/>
+    <!-- 底盘整体惯量随便先给个值，后面可以再调 -->
+    <!-- 自由根关节，6DoF（实际运动受轮子和地面接触约束） -->
+    <joint name="base_free" type="free"/>
+
+    <!-- 原来的 base_link mesh，作为车身 -->
+    <geom type="mesh"
+          rgba="1 1 1 1"
+          mesh="base_link"
+          contype="1" conaffinity="1"/>
+
+    <!-- 前左轮 -->
+     <body name="wheel_fl" pos="0.20  0.30 0.00" euler="1.5707963267948966 0 0">
+      <joint name="wheel_fl_joint" type="hinge"
+             axis="0 0 1" damping="0.1"/>
+             <!-- 轮子size是半径加高 -->
+      <geom name="wheel_fl_geom"
+            type="cylinder"
+            size="0.05 0.02"   
+            rgba="0 0 0 1"
+            friction="1.0 0.1 0.1"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 前右轮 -->
+    <body name="wheel_fr" pos="0.20 -0.30 -0.00" euler="1.5707963267948966 0 0">
+      <joint name="wheel_fr_joint" type="hinge"
+             axis="0 0 1" damping="0.1"/>
+      <geom name="wheel_fr_geom"
+            type="cylinder"
+            size="0.05 0.02"
+            rgba="0 0 0 1"
+            friction="1.0 0.1 0.1"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 后左轮 -->
+    <body name="wheel_rl" pos="-0.20  0.30 0.00" euler="1.5707963267948966 0 0">
+      <joint name="wheel_rl_joint" type="hinge"
+             axis="0 0 1" damping="0.1"/>
+      <geom name="wheel_rl_geom"
+            type="cylinder"
+            size="0.05 0.02"
+            rgba="0 0 0 1"
+            friction="1.0 0.1 0.1"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 后右轮 -->
+    <body name="wheel_rr" pos="-0.20 -0.30 -0.00" euler="1.5707963267948966 0 0">
+      <joint name="wheel_rr_joint" type="hinge"
+             axis="0 0 1" damping="0.1"/>
+      <geom name="wheel_rr_geom"
+            type="cylinder"
+            size="0.05 0.02"
+            rgba="0 0 0 1"
+            friction="1.0 0.1 0.1"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 臂是加在底盘上面的 -->
+    <body name="Link1" pos="0.084918 -2.5632e-05 0.2789" euler="0 0 0">
       <!-- 应用在Link1上面的旋转可以让车正对着兑换站 -->
       <inertial pos="-0.000350438 0.00374111 -0.0436376" quat="0.858541 0.512718 0.00472416 0.00246452" mass="1.83858" diaginertia="0.0114816 0.00828728 0.00647115"/>
       <joint name="Joint1" pos="0 0 0" axis="0 0 -1" range="-1.57 1.57" actuatorfrcrange="-1000 1000" damping="0.8" frictionloss="0.05"/>
@@ -83,17 +150,34 @@
         </body>
       </body>
     </body>
+  </body>
+
   </worldbody>
 
   <actuator>
-      <position name="Joint1_pos" joint="Joint1"
-            kp="200" forcerange="-200 200"
-            ctrlrange="-1.57 1.57"/>
-    <position name="Joint2_pos" joint="Joint2" ctrlrange="0 1.83"/>
-    <position name="Joint3_pos" joint="Joint3" ctrlrange="0 2.35"/>
-    <position name="Joint4_pos" joint="Joint4" ctrlrange="-2.26 2.26"/>
-    <position name="Joint6_pos" joint="Joint6" ctrlrange="-1.48 1.48"/>
-    <position name="Joint7_pos" joint="Joint7" ctrlrange="-3.14 3.14"/>
+    <!-- 左侧两轮：前左、后左 -->
+    <velocity name="wheel_fl_vel" joint="wheel_fl_joint" kv="5" ctrllimited="true" ctrlrange="-20 20" />
+
+    <velocity name="wheel_rl_vel" joint="wheel_rl_joint" kv="5" ctrllimited="true" ctrlrange="-20 20" />
+
+    <!-- 右侧两轮：前右、后右 -->
+    <velocity name="wheel_fr_vel"
+      joint="wheel_fr_joint"
+      kv="5"
+      ctrllimited="true" ctrlrange="-20 20" />
+
+    <velocity name="wheel_rr_vel"
+      joint="wheel_rr_joint"
+      kv="5"
+      ctrllimited="true" ctrlrange="-20 20" />
+
+
+    <position name="Joint1_pos" joint="Joint1"  kp="200" forcerange="-200 200" ctrlrange="-1.57 1.57" />
+    <position name="Joint2_pos" joint="Joint2" ctrlrange="0 1.83" />
+    <position name="Joint3_pos" joint="Joint3" ctrlrange="0 2.35" />
+    <position name="Joint4_pos" joint="Joint4" ctrlrange="-2.26 2.26" />
+    <position name="Joint6_pos" joint="Joint6" ctrlrange="-1.48 1.48" />
+    <position name="Joint7_pos" joint="Joint7" ctrlrange="-3.14 3.14" />
   </actuator>
 
 </mujoco>

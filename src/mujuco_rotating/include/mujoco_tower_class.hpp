@@ -24,16 +24,25 @@ GLFWwindow* g_window = nullptr;
 
 //============================= 类定义 ======================================
 
+namespace hitcrt{
+
+struct TeleopState {//底盘的控制结构体
+    double v = 0.0;  // 线速度（m/s，朝机器人前方）
+    double w = 0.0;  // 角速度（rad/s，绕z轴，左转为正）
+};
+
+
 class MujocoOffscreenRenderer {
    public:
+    // std::mutexs
+
     // 相机回调：给 RGB 图像 + 宽高 + 仿真时间
     using CameraCallback =
         std::function<void(const unsigned char*,const float*, int, int, double)>;
     // 控制回调：每个仿真步调用一次，你在里面写 d->ctrl / 改 qpos 等
     using ControlCallback = std::function<void(mjModel*, mjData*, double)>;
 
-    MujocoOffscreenRenderer(const std::string& model_path,
-                            double /*duration_sec*/, double fps)
+    MujocoOffscreenRenderer(const std::string& model_path, double fps)
         : model_path_(model_path), fps_(fps) {
         running_.store(true);
         initOpenGL();
@@ -104,6 +113,7 @@ class MujocoOffscreenRenderer {
 
         while (running_.load()) {
             // 1) 先调用控制回调（外部控制机械臂、电机等）
+            base_control(m_, d_, d_->time);//先控制底盘
             if (control_callback_) {
                 control_callback_(m_, d_, d_->time);
             }
@@ -116,11 +126,11 @@ class MujocoOffscreenRenderer {
                 // 渲染到当前 framebuffer
                 mjr_render(viewport_, &scn_, &con_);
                 // 读出像素（只要 RGB,depth分辨率默认是一样的,额这个无所谓把,反正转化也不是我们写的）
-                mjr_readPixels(rgb_buffer_, depth_buffer_, viewport_, &con_);
+                mjr_readPixels(rgb_buffer_, nullptr, viewport_, &con_);
 
                 // 相机回调
                 if (camera_callback_) {
-                    camera_callback_(rgb_buffer_,depth_buffer_, width_, height_, d_->time);
+                    camera_callback_(rgb_buffer_,nullptr, width_, height_, d_->time);
                 }
 
                 frametime = d_->time;
@@ -192,6 +202,13 @@ class MujocoOffscreenRenderer {
                 "Info: joint 'entry_free' not found, exchanger-entry pose API "
                 "disabled.\n");
         }
+        act_wheel_fl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fl_vel");
+        act_wheel_fr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fr_vel");
+        act_wheel_rl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rl_vel");
+        act_wheel_rr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rr_vel");
+
+
+
     }
 
     void closeMuJoCo() {
@@ -303,7 +320,46 @@ class MujocoOffscreenRenderer {
         closeOpenGL();
     }
 
+    void base_control(const mjModel* m, mjData* d, double time) {
+        // ==== 1. 差速小车 ====
+    // 一些几何参数，要和 XML 对齐
+        const double wheel_radius = 0.05;  // 对应 size="0.05 0.02" 的半径
+        const double wheel_base   = 0.40;  // 左右轮距 ~ 0.20 - (-0.20)
+        double v,w; 
+        {
+            std::lock_guard<std::mutex> lock(base_mutex_);
+            v = teleop_.v;
+            w = teleop_.w;
+        }
+
+        // 差速模型：左、右轮的角速度
+        double v_left  = (v - w * wheel_base / 2.0) / wheel_radius;
+        double v_right = (v + w * wheel_base / 2.0) / wheel_radius;
+
+        // 左侧两个轮子
+        if (act_wheel_fl_ >= 0) d->ctrl[act_wheel_fl_] = v_left;//使用相同的速度
+        if (act_wheel_rl_ >= 0) d->ctrl[act_wheel_rl_] = v_left;
+
+        // 右侧两个轮子
+        if (act_wheel_fr_ >= 0) d->ctrl[act_wheel_fr_] = v_right;
+        if (act_wheel_rr_ >= 0) d->ctrl[act_wheel_rr_] = v_right;
+
+    }
+
+    public:
+    void update_TeleopState(const double delta_v ,const double delta_w){//给变化量
+        std::lock_guard<std::mutex> lock(base_mutex_);
+        teleop_.v = delta_v;
+        teleop_.w = delta_w;
+    }
+
    private:
+    std::mutex base_mutex_;//底盘控制的锁teleop_是共享的变量
+    TeleopState teleop_;//底盘的控制结构体,控制的是速度
+    int act_wheel_fl_  ;
+    int act_wheel_fr_ ;
+    int act_wheel_rl_  ;
+    int act_wheel_rr_ ;
     std::atomic<bool> running_;
 
     // 配置
@@ -362,3 +418,5 @@ class MujocoOffscreenRenderer {
 //   cv::imshow("MuJoCo Camera", img);
 //   cv::waitKey(1);
 // }
+
+};//hitcrt

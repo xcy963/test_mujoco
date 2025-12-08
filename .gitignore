@@ -17,3 +17,5 @@ src/test_mujoco/engineer_module
 compile_commands.json
 
 fov_matrix.py
+
+src/mujuco_rotating/engineer_module/meshes/arm/back
