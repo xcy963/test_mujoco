@@ -35,13 +35,16 @@
     <inertial pos="0 0 0" mass="20" diaginertia="2 2 2"/>
     <!-- 底盘整体惯量随便先给个值，后面可以再调 -->
     <!-- 自由根关节，6DoF（实际运动受轮子和地面接触约束） -->
-    <joint name="base_free" type="free"/>
+    <joint name="base_yaw" type="hinge" axis="0 0 1" damping="2"/>
+    <joint name="base_x" type="slide" axis="1 0 0" damping="5"/>
+    <joint name="base_y" type="slide" axis="0 1 0" damping="5"/>
 
     <!-- 原来的 base_link mesh，作为车身 -->
+     <!-- 轮子没有碰撞,不然会奇怪打滑 -->
     <geom type="mesh"
           rgba="1 1 1 1"
           mesh="base_link"
-          contype="1" conaffinity="1"/>
+          contype="1" conaffinity="1" />
 
     <!-- 前左轮 -->
      <body name="wheel_fl" pos="0.20  0.30 0.00" euler="1.5707963267948966 0 0">
@@ -53,7 +56,7 @@
             size="0.05 0.02"   
             rgba="0 0 0 1"
             friction="1.0 0.1 0.1"
-            contype="1" conaffinity="1"/>
+            contype="0" conaffinity="0"/>
     </body>
 
     <!-- 前右轮 -->
@@ -65,7 +68,7 @@
             size="0.05 0.02"
             rgba="0 0 0 1"
             friction="1.0 0.1 0.1"
-            contype="1" conaffinity="1"/>
+            contype="0" conaffinity="0"/>
     </body>
 
     <!-- 后左轮 -->
@@ -77,7 +80,7 @@
             size="0.05 0.02"
             rgba="0 0 0 1"
             friction="1.0 0.1 0.1"
-            contype="1" conaffinity="1"/>
+            contype="0" conaffinity="0"/>
     </body>
 
     <!-- 后右轮 -->
@@ -89,7 +92,7 @@
             size="0.05 0.02"
             rgba="0 0 0 1"
             friction="1.0 0.1 0.1"
-            contype="1" conaffinity="1"/>
+            contype="0" conaffinity="0"/>
     </body>
 
     <!-- 臂是加在底盘上面的 -->
@@ -155,23 +158,10 @@
   </worldbody>
 
   <actuator>
-    <!-- 左侧两轮：前左、后左 -->
-    <velocity name="wheel_fl_vel" joint="wheel_fl_joint" kv="5" ctrllimited="true" ctrlrange="-20 20" />
-
-    <velocity name="wheel_rl_vel" joint="wheel_rl_joint" kv="5" ctrllimited="true" ctrlrange="-20 20" />
-
-    <!-- 右侧两轮：前右、后右 -->
-    <velocity name="wheel_fr_vel"
-      joint="wheel_fr_joint"
-      kv="5"
-      ctrllimited="true" ctrlrange="-20 20" />
-
-    <velocity name="wheel_rr_vel"
-      joint="wheel_rr_joint"
-      kv="5"
-      ctrllimited="true" ctrlrange="-20 20" />
-
-
+    <velocity name="base_x_vel" joint="base_x" kv="50" ctrllimited="true" ctrlrange="-2 2"/>
+    <velocity name="base_y_vel" joint="base_y" kv="50" ctrllimited="true" ctrlrange="-2 2"/>
+    <velocity name="base_yaw_vel" joint="base_yaw" kv="20" ctrllimited="true" ctrlrange="-6 6"/>
+  
     <position name="Joint1_pos" joint="Joint1"  kp="200" forcerange="-200 200" ctrlrange="-1.57 1.57" />
     <position name="Joint2_pos" joint="Joint2" ctrlrange="0 1.83" />
     <position name="Joint3_pos" joint="Joint3" ctrlrange="0 2.35" />

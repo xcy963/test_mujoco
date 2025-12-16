@@ -47,30 +47,8 @@ message(WARNING "Found MuJoCo include at: ${MUJOCO_INCLUDE_DIRS}")
 message(WARNING "Found MuJoCo library: ${MUJOCO_LIBRARIES}")
 
 
-set(SIMULATE_SOURCES
-  ${MUJOCO_SIMULATE_DIR}/glfw_adapter.cc
-  ${MUJOCO_SIMULATE_DIR}/glfw_dispatch.cc
-  ${MUJOCO_SIMULATE_DIR}/platform_ui_adapter.cc
-  ${MUJOCO_SIMULATE_DIR}/simulate.cc
-)
-# set(OTHER_SOURCES
-#   # include/mujuco_rotating_node.cpp
-#   # include/mujoco_test/mujoco_simulator.cpp
-# )
-
-add_library(mujoco_sim 
-  ${SIMULATE_SOURCES}
-)
-
-target_include_directories(mujoco_sim PUBLIC
-  ${MUJOCO_SIMULATE_DIR}
-  ${MUJOCO_INCLUDE_DIRS}
-  # ${EGL_INCLUDE_DIRS}
-)
-target_link_libraries(mujoco_sim PUBLIC
-    glfw
-  OpenGL::GL
-  # ${EGL_LIBRARIES}
+add_compile_options(
+     -O3 
 )
 
 #到这里mujuco应该结束了
@@ -83,6 +61,7 @@ add_executable(mujuco_rotating_node
 
 target_include_directories(mujuco_rotating_node PUBLIC
   include
+  ${MUJOCO_INCLUDE_DIRS}
 )
 # 为目标链接库
 target_link_libraries(mujuco_rotating_node
@@ -93,8 +72,10 @@ target_link_libraries(mujuco_rotating_node
 
   lodepng
   ${OpenCV_LIBS} 
-  mujoco_sim
+  # mujoco_sim
   Eigen3::Eigen
+  glfw
+  OpenGL::GL
 
 )
 

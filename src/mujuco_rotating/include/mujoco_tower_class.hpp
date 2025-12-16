@@ -9,6 +9,7 @@
 #include <mujoco/mujoco.h>
 
 #include <atomic>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -22,13 +23,16 @@ GLFWwindow* g_window = nullptr;
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "window_control.hpp"
+
 //============================= 类定义 ======================================
 
 namespace hitcrt{
 
 struct TeleopState {//底盘的控制结构体
-    double v = 0.0;  // 线速度（m/s，朝机器人前方）
-    double w = 0.0;  // 角速度（rad/s，绕z轴，左转为正）
+    double vx = 0.0;  // 线速度 x（m/s，车体前方为正）
+    double vy = 0.0;  // 线速度 y（m/s，车体左方为正）
+    double wz = 0.0;  // 角速度（rad/s，绕 z，左转为正）
 };
 
 
@@ -107,11 +111,18 @@ class MujocoOffscreenRenderer {
     }
 
     // 主循环：一直跑，直到 set_running(false)
-    void run() {
+    void run(const std::shared_ptr<GlfwRgbViewer> &window_ptr) {
         double frametime = 0.0;
         const double dt_frame = 1.0 / fps_;
 
         while (running_.load()) {
+  
+            if (window_ptr && window_ptr->isClosed()) {
+                running_.store(false);
+                break;
+            }
+            // 切换到离屏上下文，执行控制与渲染
+            glfwMakeContextCurrent(g_window);
             // 1) 先调用控制回调（外部控制机械臂、电机等）
             base_control(m_, d_, d_->time);//先控制底盘
             if (control_callback_) {
@@ -139,6 +150,7 @@ class MujocoOffscreenRenderer {
             // 3) 推进仿真
             mj_step(m_, d_);
         }
+        std::cout<<"马上要推出run函数了"<<std::endl;
     }
 
     // 给外部提供一些只读信息（可选）
@@ -202,10 +214,13 @@ class MujocoOffscreenRenderer {
                 "Info: joint 'entry_free' not found, exchanger-entry pose API "
                 "disabled.\n");
         }
-        act_wheel_fl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fl_vel");
-        act_wheel_fr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fr_vel");
-        act_wheel_rl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rl_vel");
-        act_wheel_rr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rr_vel");
+        // act_wheel_fl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fl_vel");
+        // act_wheel_fr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_fr_vel");
+        // act_wheel_rl_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rl_vel");
+        // act_wheel_rr_ = mj_name2id(m_, mjOBJ_ACTUATOR, "wheel_rr_vel");
+        act_base_x_ = mj_name2id(m_, mjOBJ_ACTUATOR, "base_x_vel");
+        act_base_y_ = mj_name2id(m_, mjOBJ_ACTUATOR, "base_y_vel");
+        act_base_yaw_ = mj_name2id(m_, mjOBJ_ACTUATOR, "base_yaw_vel");
 
 
 
@@ -291,7 +306,13 @@ class MujocoOffscreenRenderer {
                 "using default/window framebuffer\n");
         }
 
-        viewport_ = mjr_maxViewport(&con_);//这个不好用
+        // viewport_ = mjr_maxViewport(&con_);//这个不好用
+        mjr_resizeOffscreen(1920, 1080, &con_);
+
+        viewport_.left   = 0;
+        viewport_.bottom = 0;
+        viewport_.width  = 1920;
+        viewport_.height = 1080;
         width_ = viewport_.width;
         height_ = viewport_.height;
 
@@ -321,45 +342,73 @@ class MujocoOffscreenRenderer {
     }
 
     void base_control(const mjModel* m, mjData* d, double time) {
-        // ==== 1. 差速小车 ====
-    // 一些几何参数，要和 XML 对齐
-        const double wheel_radius = 0.05;  // 对应 size="0.05 0.02" 的半径
-        const double wheel_base   = 0.40;  // 左右轮距 ~ 0.20 - (-0.20)
-        double v,w; 
+        // 麦轮底盘（前进/平移/旋转）
+        const double wheel_radius = 0.05;  // 与 XML 里 wheel size 匹配
+        const double lx = 0.20;            // 前后到几何中心的距离
+        const double ly = 0.30;            // 左右到几何中心的距离
+        const double k = lx + ly;          // 旋转半径项
+
+        double vx, vy, wz;
         {
             std::lock_guard<std::mutex> lock(base_mutex_);
-            v = teleop_.v;
-            w = teleop_.w;
+            vx = teleop_.vx;
+            vy = teleop_.vy;
+            wz = teleop_.wz;
         }
 
-        // 差速模型：左、右轮的角速度
-        double v_left  = (v - w * wheel_base / 2.0) / wheel_radius;
-        double v_right = (v + w * wheel_base / 2.0) / wheel_radius;
+        // // 经典麦轮正解（车体坐标系: x前+，y左+，wz左转+）
+        // const double w_fl = (vx - vy - k * wz) / wheel_radius;
+        // const double w_fr = (vx + vy + k * wz) / wheel_radius;
+        // const double w_rl = (vx + vy - k * wz) / wheel_radius;
+        // const double w_rr = (vx - vy + k * wz) / wheel_radius;
 
-        // 左侧两个轮子
-        if (act_wheel_fl_ >= 0) d->ctrl[act_wheel_fl_] = v_left;//使用相同的速度
-        if (act_wheel_rl_ >= 0) d->ctrl[act_wheel_rl_] = v_left;
+        // auto clamp_ctrl = [](double v) {
+        //     const double limit = 20.0;  // 与 XML ctrlrange 匹配
+        //     return std::max(-limit, std::min(limit, v));
+        // };
 
-        // 右侧两个轮子
-        if (act_wheel_fr_ >= 0) d->ctrl[act_wheel_fr_] = v_right;
-        if (act_wheel_rr_ >= 0) d->ctrl[act_wheel_rr_] = v_right;
+        // if (act_wheel_fl_ >= 0) d->ctrl[act_wheel_fl_] = clamp_ctrl(w_fl);
+        // if (act_wheel_fr_ >= 0) d->ctrl[act_wheel_fr_] = clamp_ctrl(w_fr);
+        // if (act_wheel_rl_ >= 0) d->ctrl[act_wheel_rl_] = clamp_ctrl(w_rl);
+        // if (act_wheel_rr_ >= 0) d->ctrl[act_wheel_rr_] = clamp_ctrl(w_rr);
+        auto clamp = [](double v, double lo, double hi) {
+            return std::max(lo, std::min(hi, v));
+        };
 
+        // 这些限幅应与 XML ctrlrange 匹配
+        vx = clamp(vx, -2.0, 2.0);
+        vy = clamp(vy, -2.0, 2.0);
+        wz = clamp(wz, -6.0, 6.0);
+
+        // std::cout<<"控制id,x:"<<act_base_x_<<" y:"<<act_base_y_<<std::endl;
+
+        if (act_base_x_   >= 0) {
+            d->ctrl[act_base_x_]   = vx;
+            // std::cout<<"控制x"<<d->ctrl[act_base_x_]<<std::endl;
+        }
+        if (act_base_y_   >= 0) d->ctrl[act_base_y_]   = vy;
+        if (act_base_yaw_ >= 0) d->ctrl[act_base_yaw_] = wz;
     }
 
     public:
-    void update_TeleopState(const double delta_v ,const double delta_w){//给变化量
+    void update_TeleopState(const double vx ,const double vy ,const double wz){//给变化量
         std::lock_guard<std::mutex> lock(base_mutex_);
-        teleop_.v = delta_v;
-        teleop_.w = delta_w;
+        teleop_.vx = vx;
+        teleop_.vy = vy;
+        teleop_.wz = wz;
     }
 
    private:
     std::mutex base_mutex_;//底盘控制的锁teleop_是共享的变量
     TeleopState teleop_;//底盘的控制结构体,控制的是速度
-    int act_wheel_fl_  ;
-    int act_wheel_fr_ ;
-    int act_wheel_rl_  ;
-    int act_wheel_rr_ ;
+    int act_base_x_;
+    int act_base_y_;
+    int act_base_yaw_;
+
+    // int act_wheel_fl_  ;
+    // int act_wheel_fr_ ;
+    // int act_wheel_rl_  ;
+    // int act_wheel_rr_ ;
     std::atomic<bool> running_;
 
     // 配置
@@ -395,28 +444,5 @@ class MujocoOffscreenRenderer {
     ControlCallback control_callback_;
 };
 
-// //==================== 一个简单的 OpenCV demo 回调 ===================
-
-// static void OpenCVCameraCallback(const unsigned char* rgb,
-//                                  int width, int height, double /*sim_time*/)
-// {
-//   cv::Mat img(height, width, CV_8UC3);
-
-//   for (int r = 0; r < height; ++r) {
-//     const unsigned char* src_row = rgb + (height - 1 - r) * width * 3;
-//     cv::Vec3b* dst_row = img.ptr<cv::Vec3b>(r);
-//     for (int c = 0; c < width; ++c) {
-//       unsigned char R = src_row[3*c + 0];
-//       unsigned char G = src_row[3*c + 1];
-//       unsigned char B = src_row[3*c + 2];
-//       dst_row[c][0] = B;
-//       dst_row[c][1] = G;
-//       dst_row[c][2] = R;
-//     }
-//   }
-
-//   cv::imshow("MuJoCo Camera", img);
-//   cv::waitKey(1);
-// }
 
 };//hitcrt
